@@ -1,0 +1,143 @@
+/* eslint-disable import-x/no-named-as-default-member */
+
+import comments from "@eslint-community/eslint-plugin-eslint-comments/configs"
+import react from "@eslint-react/eslint-plugin"
+import js from "@eslint/js"
+import pluginNext from "@next/eslint-plugin-next"
+import prettierConfig from "eslint-config-prettier"
+import diff from "eslint-plugin-diff"
+import eslintPluginImportX from "eslint-plugin-import-x"
+import pluginReactHooks from "eslint-plugin-react-hooks"
+import regexPlugin from "eslint-plugin-regexp"
+import security from "eslint-plugin-security"
+import tailwind from "eslint-plugin-tailwindcss"
+import { defineConfig, globalIgnores } from "eslint/config"
+import globals from "globals"
+import tseslint from "typescript-eslint"
+
+export default defineConfig([
+  // Global ignores
+  globalIgnores([".next", "node_modules"]),
+
+  // Base ESLint + TypeScript
+  js.configs.recommended,
+  ...tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+
+  // Import-X
+  eslintPluginImportX.flatConfigs.recommended,
+  eslintPluginImportX.flatConfigs.typescript,
+
+  // ESLint Comments
+  comments.recommended,
+
+  // Regexp
+  regexPlugin.configs["flat/recommended"],
+
+  // Security
+  security.configs.recommended,
+
+  // Next.js (native flat config)
+  {
+    plugins: {
+      "@next/next": pluginNext,
+    },
+    rules: {
+      ...pluginNext.configs.recommended.rules,
+    },
+  },
+
+  // React Hooks (native flat config, includes Compiler rules in v6+)
+  {
+    plugins: {
+      "react-hooks": pluginReactHooks,
+    },
+    settings: {
+      react: { version: "detect" },
+    },
+    rules: {
+      ...pluginReactHooks.configs["recommended-latest"].rules,
+    },
+  },
+
+  // ESLint React
+  react.configs["recommended-type-checked"],
+
+  // Tailwind
+  ...tailwind.configs["flat/recommended"],
+
+  // Git Diff
+  ...diff.configs["flat/recommended"],
+
+  // Main config block
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: true,
+    },
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    settings: {
+      tailwindcss: {
+        callees: ["classnames", "clsx", "ctl", "cn", "cva"],
+      },
+      react: {
+        version: "detect",
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        { prefer: "type-imports", fixStyle: "separate-type-imports" },
+      ],
+
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        { checksVoidReturn: { attributes: false } },
+      ],
+
+      "@typescript-eslint/no-unnecessary-condition": [
+        "error",
+        {
+          allowConstantLoopConditions: true,
+        },
+      ],
+
+      "@typescript-eslint/consistent-type-exports": [
+        "error",
+        { fixMixedExportsWithInlineTypeSpecifier: true },
+      ],
+
+      "import-x/no-unresolved": ["error", { ignore: ["geist"] }],
+      "react-compiler/react-compiler": "error",
+    },
+  },
+
+  // CJS/CTS files
+  {
+    files: ["**/*.cjs", "**/*.cts"],
+    languageOptions: {
+      sourceType: "commonjs",
+    },
+  },
+
+  // Prettier (must be last)
+  prettierConfig,
+])

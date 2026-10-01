@@ -11,7 +11,7 @@ const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url))
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIRECTORY, "..")
 const ENV_FILE = path.join(REPOSITORY_ROOT, ".env")
 const XOR_KEY_NAME = "NEXT_PUBLIC_CATALOG_XOR_KEY"
-const FILE_MAGIC = Buffer.from("PCTCAT1:", "ascii")
+const FILE_MAGIC = Buffer.from("PCTCAT2:", "ascii")
 
 const FIELD_ALIASES = {
   content: [
@@ -142,7 +142,11 @@ function readEnvValue(name) {
 }
 
 function normalizeKey(value) {
-  return value.toLocaleLowerCase().replace(/[^a-z0-9]/g, "")
+  return value
+    .toLocaleLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}]/gu, "")
 }
 
 function isRecord(value) {
@@ -212,7 +216,25 @@ function findField(record, aliases) {
 function normalizeRows(parsedJson) {
   const sourceRows = rowsFrom(parsedJson)
   const products = []
+  const manufacturers = []
+  const packaging = []
+  const manufacturerIndexes = new Map()
+  const packagingIndexes = new Map()
   let skippedRows = 0
+
+  function dictionaryIndex(value, values, indexes) {
+    const text = asText(value)
+    if (!text) return null
+
+    const key = normalizeKey(text)
+    const existingIndex = indexes.get(key)
+    if (existingIndex !== undefined) return existingIndex
+
+    const index = values.length
+    values.push(text)
+    indexes.set(key, index)
+    return index
+  }
 
   for (const row of sourceRows) {
     if (!isRecord(row)) {
@@ -228,22 +250,28 @@ function normalizeRows(parsedJson) {
       continue
     }
 
-    const normalized = {
-      content,
-      product,
-      packSize: asText(findField(row, FIELD_ALIASES.packSize)),
-      rate: asText(findField(row, FIELD_ALIASES.rate)).replace(/^\$\s*/, ""),
-      manufacturer: asText(findField(row, FIELD_ALIASES.manufacturer)),
-    }
-
-    products.push(
-      Object.fromEntries(
-        Object.entries(OUTPUT_FIELDS).map(([key, outputName]) => [
-          outputName,
-          normalized[key],
-        ])
-      )
+    const manufacturer = asText(findField(row, FIELD_ALIASES.manufacturer))
+    const packSize = asText(findField(row, FIELD_ALIASES.packSize))
+    const rate = asText(findField(row, FIELD_ALIASES.rate)).replace(
+      /^\$\s*/,
+      ""
     )
+
+    products.push({
+      [OUTPUT_FIELDS.product]: product,
+      [OUTPUT_FIELDS.content]: content,
+      [OUTPUT_FIELDS.manufacturer]: dictionaryIndex(
+        manufacturer,
+        manufacturers,
+        manufacturerIndexes
+      ),
+      [OUTPUT_FIELDS.packSize]: dictionaryIndex(
+        packSize,
+        packaging,
+        packagingIndexes
+      ),
+      [OUTPUT_FIELDS.rate]: rate,
+    })
   }
 
   if (products.length === 0) {
@@ -252,9 +280,12 @@ function normalizeRows(parsedJson) {
     )
   }
 
-  return { products, sourceRows: sourceRows.length, skippedRows }
+  return {
+    catalog: { manufacturers, packaging, products },
+    sourceRows: sourceRows.length,
+    skippedRows,
+  }
 }
-
 function xorBytes(bytes, keyBytes) {
   const result = Buffer.allocUnsafe(bytes.length)
 
@@ -322,8 +353,8 @@ async function main() {
     throw new Error(`Could not parse input JSON: ${message}`)
   }
 
-  const { products, sourceRows, skippedRows } = normalizeRows(parsedJson)
-  const jsonBytes = Buffer.from(JSON.stringify(products), "utf8")
+  const { catalog, sourceRows, skippedRows } = normalizeRows(parsedJson)
+  const jsonBytes = Buffer.from(JSON.stringify(catalog), "utf8")
   const gzipBytes = gzipSync(jsonBytes, { level: 9 })
   const encryptedPayload = xorBytes(gzipBytes, keyBytes)
   const outputPayload = Buffer.concat([FILE_MAGIC, encryptedPayload])
@@ -335,9 +366,12 @@ async function main() {
   console.log(`Version: ${result.version}`)
   console.log(`File: ${result.fileName}`)
   console.log(`Output: ${result.outputPath}`)
-  console.log(`Rows: ${products.length.toLocaleString()} normalized`)
+  console.log(`Rows: ${catalog.products.length.toLocaleString()} normalized`)
   console.log(
     `Rows skipped: ${skippedRows.toLocaleString()} of ${sourceRows.toLocaleString()}`
+  )
+  console.log(
+    `Dictionary values: ${catalog.manufacturers.length.toLocaleString()} manufacturers, ${catalog.packaging.length.toLocaleString()} packaging options`
   )
   console.log(`Normalized JSON: ${jsonBytes.length.toLocaleString()} bytes`)
   console.log(

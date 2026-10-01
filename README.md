@@ -1,6 +1,6 @@
 # PCT24X7
 
-A responsive pharmaceutical catalog site built with Next.js App Router, React, TypeScript, Tailwind CSS v4, shadcn/ui primitives, Motion and MiniSearch.
+A responsive pharmaceutical catalog site built with Next.js App Router, React, TypeScript, Tailwind CSS v4, Base UI/shadcn-style components, Motion and MiniSearch.
 
 ## Development
 
@@ -22,10 +22,11 @@ bun run build
 
 ## UI, theme and configuration
 
-- Tailwind CSS v4 is the styling foundation; shadcn/ui is configured in `components.json`.
-- Accessible shadcn-style primitives live in `src/components/ui`: Button, Card, Input and Radix Accordion.
-- Shared color, radius, dark-theme and motion tokens are in `src/styles/main.css`. The theme toggle respects the system setting and remembers the visitor's choice.
-- Public contact details, navigation, catalog URLs and the build-time XOR key are read centrally through `src/config/site.ts`.
+- Tailwind CSS v4 is the styling foundation. `components.json` is configured for shadcn's Base UI primitives; the project does not use Radix UI.
+- Accessible Button and Accordion primitives live in `src/components/ui`. Links that look like buttons remain native anchors for correct link semantics.
+- Shared light/dark colors, radii and elevation tokens live in the `:root` and `.dark` blocks in `src/styles/main.css`. Components use Tailwind utilities; the stylesheet is limited to tokens, global foundations and reduced-motion behavior.
+- Manrope and DM Sans are self-hosted through `next/font/local` in `src/app/layout.tsx`; there are no external Google Fonts links or build-time font network requests. Their OFL licenses are included alongside the WOFF2 files in `src/fonts`.
+- Environment-backed site/business settings live in `src/config/site.ts`; FAQ and page copy live in `src/config/content.ts`. Shared data and content types live in `src/types`.
 - Set public site values in `.env` and in the deployment environment. `NEXT_PUBLIC_*` values are embedded in the static JavaScript bundle, so they are visible to visitors and require a rebuild after changes.
 
 Example public contact settings:
@@ -43,18 +44,40 @@ NEXT_PUBLIC_CATALOG_PDF_URL=https://pct247.ru/products.pdf
 
 ## Site features
 
-- Full-bleed, compact responsive healthcare hero with an optimized WebP visual and live HTML headline text
-- Floating header that stays visible while scrolling, smooth anchor navigation and reduced-motion-aware transitions
-- Persistent light/dark mode, gradient surface treatments and animated FAQ accordion
+- Full-bleed, responsive healthcare hero with an optimized WebP visual and live HTML headline text
+- Floating header that stays visible while scrolling, smooth anchor navigation and reduced-motion-aware motion
+- Persistent light/dark mode and an accessible Base UI FAQ accordion
 - Fuzzy, prefix-enabled browser search with highlighting, manufacturer display, pagination and derived serial numbers
-- Catalog fields: `Product Name`, `Active Ingredient`, `Manufacturer`, `Packaging` and `RATE (USD)`
+- Price-range filters plus multi-select Manufacturer and Packaging filters, each with Include and Exclude modes
+- Compact catalog artifact with deduplicated manufacturer and packaging dictionaries
+- Catalog product rows contain only `Product Name`, `Active Ingredient`, `Manufacturer`, `Packaging` and `RATE (USD)`; blank dictionary references are `null` and populated references are zero-based indexes
 - Optional CDN catalog loading with preview, loading and error states
 
 The checked-in catalog remains a **195-row preview** until the full sheet is processed and its generated artifact is deployed. The raw source JSON should be temporary; generated `.dat` artifacts are ignored by default.
 
 ## Build a versioned catalog artifact
 
-`scripts/build-catalog.mjs` accepts the JSON source and an output directory as absolute paths. It normalizes each valid record to only the five requested fields, removes S. No. and all other columns, compresses the compact JSON with gzip, XOR-obfuscates the compressed bytes, and writes a randomly versioned artifact such as `catalog.a1b2c3.dat`. The artifact starts with a short format marker so the browser can identify it before decoding.
+`scripts/build-catalog.mjs` accepts the JSON source and an output directory as absolute paths. It normalizes each valid record to the five requested fields, removes S. No. and all other columns, deduplicates Manufacturer and Packaging into separate arrays, compresses the compact JSON with gzip, XOR-obfuscates the compressed bytes, and writes a randomly versioned artifact such as `catalog.a1b2c3.dat` with the `PCTCAT2:` format marker.
+
+The decoded JSON has this structure:
+
+```json
+{
+  "manufacturers": ["Example Laboratories"],
+  "packaging": ["1X10"],
+  "products": [
+    {
+      "Product Name": "EXAMPLE 10MG",
+      "Active Ingredient": "Example ingredient",
+      "Manufacturer": 0,
+      "Packaging": 0,
+      "RATE (USD)": "1.25"
+    }
+  ]
+}
+```
+
+The indexes start at zero. Rows with no manufacturer or packaging use `null` for that field. RATE values have a leading `$` removed; the full active-ingredient string is retained in the file and truncated only in the table display. At runtime, the client resolves dictionary indexes before it builds MiniSearch or applies filters.
 
 Set `NEXT_PUBLIC_CATALOG_XOR_KEY` in `.env` before running the script:
 
@@ -70,9 +93,9 @@ node .\scripts\build-catalog.mjs `
   --output "C:\path\to\pct\public\data"
 ```
 
-Do not put the full source in `src/data`. `public/catalog-input` is a convenient temporary builder input. Next.js copies every file in `public` into the static export, so remove the raw JSON from `public` after generating the `.dat` and before every `next build`; leave the versioned artifact in `public/data`. The app's `src/data/catalog.ts` is only the checked-in preview.
+`public/catalog-input` is a convenient temporary builder input. Next.js copies every file in `public` into the static export, so remove the raw JSON from `public` after generating the `.dat` and before every `next build`; leave the versioned artifact in `public/data`. The app's `src/data/catalog.ts` is only the checked-in preview.
 
-The script prints the version, filename, output path, normalized row count and skipped-row count. It supports arrays of records, common object wrappers (`products`, `data`, `rows`, `values`), and Google Sheets' header-row/values format. Rows without `Product Name` and `Active Ingredient` (or recognized aliases) are skipped and counted. `Manufacturer`, `Packaging` and `RATE (USD)` can be blank. RATE values have a leading `$` removed; the original full ingredient string is retained.
+The script prints the random version, filename, output path, normalized row count, skipped-row count, dictionary sizes and artifact size. It supports arrays of records, common object wrappers (`products`, `data`, `rows`, `values`), and Google Sheets' header-row/values format. Rows without `Product Name` and `Active Ingredient` (or recognized aliases) are skipped and counted. Manufacturer, Packaging and RATE can be blank. The client loader also accepts legacy `PCTCAT1:` artifacts and older flat JSON catalogs during migration.
 
 The git ignore rule prevents accidental commits of generated `.dat` files. For a Git-backed Pages deployment where the artifact lives under `public/data`, add the specific output intentionally with `git add -f public/data/catalog.<version>.dat`. Or keep it outside the repo and upload it to a separate CDN/R2 bucket.
 
@@ -93,7 +116,7 @@ bun run build
 
 If the artifact is under `public/data`, Next.js copies it to `out/data`. Cloudflare Pages reads `public/_headers` from the static export. Versioned filenames can safely use long-lived immutable caching because each update has a new URL. If you change `.env`, rebuild/redeploy Pages: `NEXT_PUBLIC_*` values are embedded in the static client bundle at build time. A stable manifest URL is an alternative if you want to switch versions without rebuilding the site.
 
-The browser loader fetches the configured URL, removes the format marker, XOR-decodes with the build-time key, decompresses gzip using `DecompressionStream`, normalizes the five fields and builds the MiniSearch index locally. Serve the `.dat` object as binary (`application/octet-stream`) and do not manually set `Content-Encoding: gzip` on the XOR-obfuscated file. A CDN may transparently compress the response, but the browser must return the original marker-plus-payload bytes to the loader.
+The browser loader fetches the configured URL, removes the format marker, XOR-decodes with the build-time key, decompresses gzip using `DecompressionStream`, expands the compact dictionaries, and builds the MiniSearch index locally. Serve the `.dat` object as binary (`application/octet-stream`) and do not manually set `Content-Encoding: gzip` on the XOR-obfuscated file. A CDN may transparently compress the response, but the browser must return the original marker-plus-payload bytes to the loader.
 
 A WAF rate limit can reduce abusive request volume, but it cannot make a public static file private. Bot challenges may also interfere with browser fetches, so test them against the catalog URL. **XOR is obfuscation, not encryption:** the browser must receive the same key and visitors can recover it from the client bundle. Do not use a sensitive secret or rely on XOR for access control. Use an authenticated server-side endpoint if the data needs to be private.
 

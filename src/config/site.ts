@@ -1,8 +1,9 @@
+import type { SiteConfig } from "@/types/site"
+
 const DEFAULT_SITE_NAME = "PCT24X7"
 
 function publicValue(value: string | undefined, fallback = "") {
   const trimmed = value?.trim()
-
   if (!trimmed) return fallback
   return trimmed
 }
@@ -65,4 +66,4 @@ export const siteConfig = {
     xorKey: publicValue(process.env.NEXT_PUBLIC_CATALOG_XOR_KEY),
     pdfUrl: publicValue(process.env.NEXT_PUBLIC_CATALOG_PDF_URL),
   },
-} as const
+} satisfies SiteConfig

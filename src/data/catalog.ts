@@ -1,4 +1,4 @@
-import type { CatalogProduct } from "./catalog-format"
+import type { CatalogProduct } from "@/types/catalog"
 
 // Small bundled preview; production can load the complete list from the CDN.
 const previewRows = `

@@ -1,62 +1,84 @@
 "use client"
 
-import { ArrowUpRight, Mail, MessageCircle, Pill, Phone } from "lucide-react"
-import {
-  motion,
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-} from "motion/react"
-import { useState } from "react"
+import { ArrowUpRight, Mail, MessageCircle, Phone } from "lucide-react"
+import { motion, useReducedMotion, useScroll, useSpring } from "motion/react"
+import { useSyncExternalStore } from "react"
 
-const WHATSAPP_URL = "https://wa.me/918766267499"
-const EMAIL_ADDRESS = "shop@pct24x7.store"
-const PHONE_NUMBER = "+91 8766267499"
+import { Brand } from "@/components/brand"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { siteConfig } from "@/config/site"
+import { cn } from "@/lib/utils"
+
+function subscribeToScroll(callback: () => void) {
+  window.addEventListener("scroll", callback, { passive: true })
+
+  return () => {
+    window.removeEventListener("scroll", callback)
+  }
+}
+
+function getFloatingSnapshot() {
+  return window.scrollY > 40
+}
+
+function getServerSnapshot() {
+  return false
+}
 
 export function SiteHeader() {
-  const [isFloating, setIsFloating] = useState(false)
-  const { scrollY } = useScroll()
+  const isFloating = useSyncExternalStore(
+    subscribeToScroll,
+    getFloatingSnapshot,
+    getServerSnapshot
+  )
   const prefersReducedMotion = useReducedMotion()
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const shouldFloat = latest > 36
-    setIsFloating((current) =>
-      current === shouldFloat ? current : shouldFloat
-    )
+  const { scrollYProgress } = useScroll()
+  const scrollProgress = useSpring(scrollYProgress, {
+    damping: 30,
+    restDelta: 0.001,
+    stiffness: 120,
   })
 
   return (
     <>
+      <motion.div
+        aria-hidden="true"
+        className="scroll-progress"
+        style={{
+          scaleX: prefersReducedMotion ? scrollYProgress : scrollProgress,
+        }}
+      />
       <div className="utility-bar">
         <div className="site-container utility-inner">
           <p className="utility-note">
-            <span className="live-dot" aria-hidden="true" />
-            Your trusted healthcare partner since 2012
+            <span aria-hidden="true" className="live-dot" />
+            Your trusted healthcare partner since {siteConfig.founded}
           </p>
           <div className="utility-links">
-            <a href={`tel:${PHONE_NUMBER.replaceAll(" ", "")}`}>
+            <a href={siteConfig.contact.phoneHref}>
               <Phone aria-hidden="true" size={14} />
-              {PHONE_NUMBER}
+              {siteConfig.contact.phone}
             </a>
-            <a href={`mailto:${EMAIL_ADDRESS}`}>
+            <a href={siteConfig.contact.emailHref}>
               <Mail aria-hidden="true" size={14} />
-              {EMAIL_ADDRESS}
+              {siteConfig.contact.email}
             </a>
           </div>
         </div>
       </div>
 
-      <div className="header-spacer" aria-hidden="true" />
+      <div aria-hidden="true" className="header-spacer" />
       <motion.header
-        className={`site-header${isFloating ? "is-floating" : ""}`}
-        initial={false}
         animate={{
-          top: isFloating ? 12 : 37,
+          top: isFloating ? 10 : 37,
           borderRadius: isFloating ? 18 : 0,
           boxShadow: isFloating
             ? "0 14px 38px rgba(20, 48, 84, 0.16)"
             : "0 1px 0 rgba(30, 58, 93, 0.06)",
         }}
+        className={cn("site-header", isFloating && "is-floating")}
+        initial={false}
         transition={
           prefersReducedMotion
             ? { duration: 0 }
@@ -64,53 +86,41 @@ export function SiteHeader() {
         }
       >
         <div className="site-container header-inner">
-          <a className="brand" href="#home" aria-label="PCT24X7 home">
-            <span className="brand-mark" aria-hidden="true">
-              <Pill size={22} strokeWidth={2.2} />
-            </span>
-            <span className="brand-type">
-              <span className="brand-name">
-                PCT<span>24X7</span>
-              </span>
-              <span className="brand-caption">PHARMACEUTICAL HEALTHCARE</span>
-            </span>
-          </a>
+          <Brand />
 
-          <nav className="primary-nav" aria-label="Main navigation">
-            <a href="#home" className="nav-link nav-link-active">
-              Home
-            </a>
-            <a href="#about" className="nav-link">
-              About Us
-            </a>
-            <a href="#catalog" className="nav-link">
-              Catalog
-            </a>
-            <a href="#faq" className="nav-link">
-              FAQs
-            </a>
-            <a href="#contact" className="nav-link">
-              Contact Us
-            </a>
+          <nav aria-label="Main navigation" className="primary-nav">
+            {siteConfig.navigation.map((item, index) => (
+              <a
+                className={cn("nav-link", index === 0 && "nav-link-active")}
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
-          <a
-            className="header-contact"
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <MessageCircle aria-hidden="true" size={17} />
-            <span>Chat with us</span>
-            <ArrowUpRight aria-hidden="true" size={15} />
-          </a>
+          <div className="header-actions">
+            <Button asChild className="header-contact" size="sm">
+              <a
+                href={siteConfig.contact.whatsappHref}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <MessageCircle aria-hidden="true" />
+                <span>Chat with us</span>
+                <ArrowUpRight aria-hidden="true" />
+              </a>
+            </Button>
+            <ThemeToggle className="header-theme-toggle" />
+          </div>
 
-          <nav className="mobile-nav" aria-label="Mobile navigation">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#catalog">Catalog</a>
-            <a href="#faq">FAQs</a>
-            <a href="#contact">Contact</a>
+          <nav aria-label="Mobile navigation" className="mobile-nav">
+            {siteConfig.navigation.map((item) => (
+              <a href={item.href} key={item.href}>
+                {item.mobileLabel}
+              </a>
+            ))}
           </nav>
         </div>
       </motion.header>

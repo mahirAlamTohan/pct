@@ -1,5 +1,11 @@
-import { ChevronDown, CircleHelp } from "lucide-react"
+import { ArrowRight, CircleHelp } from "lucide-react"
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { FAQS } from "@/data/faq"
 import { Reveal } from "@/components/reveal"
 
@@ -18,25 +24,35 @@ export function FAQSection() {
             products, downloads and supply.
           </p>
           <a className="text-link" href="#contact">
-            Still have a question? Get in touch{" "}
-            <span aria-hidden="true">→</span>
+            Still have a question? Get in touch
+            <ArrowRight aria-hidden="true" size={16} />
           </a>
         </Reveal>
 
-        <Reveal className="faq-list" delay={0.1}>
-          {FAQS.map((item, index) => (
-            <details
-              className="faq-item"
-              key={item.question}
-              open={index === 0}
-            >
-              <summary>
-                <span>{item.question}</span>
-                <ChevronDown aria-hidden="true" size={18} />
-              </summary>
-              <p>{item.answer}</p>
-            </details>
-          ))}
+        <Reveal className="faq-reveal" delay={0.1}>
+          <Accordion
+            className="faq-list overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+            collapsible
+            defaultValue="faq-0"
+            type="single"
+          >
+            {FAQS.map((item, index) => (
+              <AccordionItem
+                className="faq-item"
+                key={item.question}
+                value={`faq-${index.toString()}`}
+              >
+                <AccordionTrigger className="faq-trigger min-h-16 px-5 py-4 text-left hover:no-underline">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="faq-content px-5">
+                  <p className="m-0 max-w-184 text-sm leading-7 text-muted-foreground">
+                    {item.answer}
+                  </p>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </Reveal>
       </div>
     </section>

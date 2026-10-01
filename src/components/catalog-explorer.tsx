@@ -14,11 +14,14 @@ import {
 import MiniSearch, { type SearchResult } from "minisearch"
 import { useEffect, useMemo, useState } from "react"
 
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { siteConfig } from "@/config/site"
 import { fetchCatalogData } from "@/data/fetch-catalog"
 import type { CatalogProduct } from "@/data/catalog-format"
 
 const PAGE_SIZE = 10
-const CATALOG_PDF_URL = "https://pct247.ru/products.pdf"
 const SEARCH_FIELDS = ["content", "product", "packSize", "rate", "manufacturer"]
 
 type CatalogMatch = SearchResult["match"]
@@ -267,7 +270,7 @@ export function CatalogExplorer({
           </p>
         </div>
 
-        <div className="catalog-card">
+        <Card className="catalog-card">
           <div className="catalog-card-heading">
             <div>
               <span className="catalog-overline">
@@ -304,39 +307,48 @@ export function CatalogExplorer({
             <label className="catalog-search">
               <Search aria-hidden="true" size={19} />
               <span className="sr-only">Search the medicine catalog</span>
-              <input
-                type="search"
-                value={query}
+              <Input
+                aria-describedby="catalog-search-help"
+                autoComplete="off"
+                className="catalog-search-input"
                 onChange={(event) => {
                   updateQuery(event.target.value)
                 }}
                 placeholder="Search by ingredient, product, pack…"
-                autoComplete="off"
-                aria-describedby="catalog-search-help"
+                type="search"
+                value={query}
               />
             </label>
             <div className="catalog-toolbar-actions">
-              <button
-                className="button button-clear"
-                type="button"
+              <Button
+                className="button-clear"
+                disabled={!query}
                 onClick={() => {
                   updateQuery("")
                 }}
-                disabled={!query}
+                size="sm"
+                type="button"
+                variant="outline"
               >
-                <X aria-hidden="true" size={15} />
+                <X aria-hidden="true" />
                 Clear
-              </button>
-              <a
-                className="button button-download"
-                href={CATALOG_PDF_URL}
-                target="_blank"
-                rel="noreferrer"
+              </Button>
+              <Button
+                asChild
+                className="button-download"
+                size="sm"
+                variant="secondary"
               >
-                <Download aria-hidden="true" size={17} />
-                Download full catalog
-                <ArrowUpRight aria-hidden="true" size={15} />
-              </a>
+                <a
+                  href={siteConfig.catalog.pdfUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <Download aria-hidden="true" />
+                  Download full catalog
+                  <ArrowUpRight aria-hidden="true" />
+                </a>
+              </Button>
             </div>
           </div>
           <p className="catalog-search-help sr-only" id="catalog-search-help">
@@ -461,15 +473,16 @@ export function CatalogExplorer({
                 Try another ingredient, product name, manufacturer or pack size,
                 or open the full catalog PDF.
               </p>
-              <a
-                className="button button-secondary"
-                href={CATALOG_PDF_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Download aria-hidden="true" size={16} />
-                Open the full product catalog
-              </a>
+              <Button asChild size="sm" variant="outline">
+                <a
+                  href={siteConfig.catalog.pdfUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <Download aria-hidden="true" />
+                  Open the full product catalog
+                </a>
+              </Button>
             </div>
           )}
 
@@ -489,33 +502,37 @@ export function CatalogExplorer({
               )}
             </p>
             <div className="pagination" aria-label="Catalog pagination">
-              <button
+              <Button
+                aria-label="Previous page"
                 className="page-button"
-                type="button"
+                disabled={currentPage === 1}
                 onClick={() => {
                   setPage((current) => Math.max(current - 1, 1))
                 }}
-                disabled={currentPage === 1}
-                aria-label="Previous page"
+                size="sm"
+                type="button"
+                variant="outline"
               >
-                <ChevronLeft aria-hidden="true" size={17} />
+                <ChevronLeft aria-hidden="true" />
                 <span>Prev</span>
-              </button>
+              </Button>
               <span className="page-count">
                 {currentPage} <span>/</span> {pageCount}
               </span>
-              <button
+              <Button
+                aria-label="Next page"
                 className="page-button"
-                type="button"
+                disabled={currentPage === pageCount}
                 onClick={() => {
                   setPage((current) => Math.min(current + 1, pageCount))
                 }}
-                disabled={currentPage === pageCount}
-                aria-label="Next page"
+                size="sm"
+                type="button"
+                variant="outline"
               >
                 <span>Next</span>
-                <ChevronRight aria-hidden="true" size={17} />
-              </button>
+                <ChevronRight aria-hidden="true" />
+              </Button>
             </div>
           </div>
 
@@ -524,7 +541,7 @@ export function CatalogExplorer({
             is a preview until the full normalized catalog is available at the
             configured catalog URL.
           </p>
-        </div>
+        </Card>
       </div>
     </section>
   )

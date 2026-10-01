@@ -9,11 +9,10 @@ import {
   ShieldCheck,
 } from "lucide-react"
 
+import { Brand } from "@/components/brand"
 import { Reveal } from "@/components/reveal"
-
-const PHONE_NUMBER = "+91 8766267499"
-const EMAIL_ADDRESS = "shop@pct24x7.store"
-const WHATSAPP_URL = "https://wa.me/918766267499"
+import { Button } from "@/components/ui/button"
+import { siteConfig } from "@/config/site"
 
 export function AboutContactSection() {
   return (
@@ -23,13 +22,13 @@ export function AboutContactSection() {
           <Reveal className="about-copy">
             <span className="eyebrow">
               <Pill aria-hidden="true" size={15} />
-              About PCT24X7
+              About {siteConfig.name}
             </span>
             <h2>Reliable healthcare supply, built on trust.</h2>
             <p>
-              PCT24X7 has been supplying generic medicines and ethical brand
-              medications from India since 2012, with a focus on reliable
-              service, competitive pricing and international shipping.
+              {siteConfig.name} has supplied generic medicines and ethical-brand
+              medications from India since {siteConfig.founded}, with a focus on
+              reliable service, competitive pricing and international shipping.
             </p>
             <div className="about-highlights">
               <div>
@@ -44,15 +43,15 @@ export function AboutContactSection() {
           </Reveal>
 
           <Reveal
+            aria-label={`${siteConfig.name} service details`}
             className="about-visual"
             delay={0.12}
-            aria-label="PCT24X7 service details"
           >
             <div className="about-stat-card">
               <span className="stat-icon">
                 <Pill aria-hidden="true" size={20} />
               </span>
-              <span className="stat-number">2012</span>
+              <span className="stat-number">{siteConfig.founded}</span>
               <span className="stat-label">Serving customers since</span>
               <span className="stat-rule" />
               <p>Thoughtful service and dependable healthcare supply.</p>
@@ -66,8 +65,8 @@ export function AboutContactSection() {
                 <span>USA · UK · New Zealand · Australia</span>
               </div>
             </div>
-            <span className="about-orbit orbit-one" aria-hidden="true" />
-            <span className="about-orbit orbit-two" aria-hidden="true" />
+            <span aria-hidden="true" className="about-orbit orbit-one" />
+            <span aria-hidden="true" className="about-orbit orbit-two" />
           </Reveal>
         </div>
       </section>
@@ -86,22 +85,28 @@ export function AboutContactSection() {
                 email. Our team is ready to assist.
               </p>
               <div className="contact-ctas">
-                <a
-                  className="button button-white"
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noreferrer"
+                <Button
+                  asChild
+                  className="button-white"
+                  size="sm"
+                  variant="secondary"
                 >
-                  <MessageCircle aria-hidden="true" size={17} />
-                  Message on WhatsApp
-                  <ArrowUpRight aria-hidden="true" size={15} />
-                </a>
+                  <a
+                    href={siteConfig.contact.whatsappHref}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <MessageCircle aria-hidden="true" />
+                    Message on WhatsApp
+                    <ArrowUpRight aria-hidden="true" />
+                  </a>
+                </Button>
                 <a
                   className="contact-email-link"
-                  href={`mailto:${EMAIL_ADDRESS}`}
+                  href={siteConfig.contact.emailHref}
                 >
                   <Mail aria-hidden="true" size={16} />
-                  {EMAIL_ADDRESS}
+                  {siteConfig.contact.email}
                 </a>
               </div>
             </div>
@@ -113,8 +118,8 @@ export function AboutContactSection() {
                 </span>
                 <div>
                   <span>Phone / WhatsApp</span>
-                  <a href={`tel:${PHONE_NUMBER.replaceAll(" ", "")}`}>
-                    {PHONE_NUMBER}
+                  <a href={siteConfig.contact.phoneHref}>
+                    {siteConfig.contact.phone}
                   </a>
                 </div>
               </div>
@@ -124,7 +129,9 @@ export function AboutContactSection() {
                 </span>
                 <div>
                   <span>Email</span>
-                  <a href={`mailto:${EMAIL_ADDRESS}`}>{EMAIL_ADDRESS}</a>
+                  <a href={siteConfig.contact.emailHref}>
+                    {siteConfig.contact.email}
+                  </a>
                 </div>
               </div>
               <div className="contact-detail">
@@ -133,7 +140,7 @@ export function AboutContactSection() {
                 </span>
                 <div>
                   <span>Support hours</span>
-                  <strong>Mon – Sat · 9:00 AM – 8:00 PM IST</strong>
+                  <strong>{siteConfig.contact.supportHours}</strong>
                 </div>
               </div>
             </div>
@@ -144,65 +151,51 @@ export function AboutContactSection() {
       <footer className="site-footer">
         <div className="site-container footer-main">
           <div className="footer-brand-block">
-            <a
-              className="brand brand-footer"
-              href="#home"
-              aria-label="PCT24X7 home"
-            >
-              <span className="brand-mark" aria-hidden="true">
-                <Pill size={22} strokeWidth={2.2} />
-              </span>
-              <span className="brand-type">
-                <span className="brand-name">
-                  PCT<span>24X7</span>
-                </span>
-                <span className="brand-caption">PHARMACEUTICAL HEALTHCARE</span>
-              </span>
-            </a>
+            <Brand footer />
             <span className="footer-brand-kicker">
               Reliable Healthcare Supply
             </span>
             <p>
-              PCT24X7 has supplied generic medicines and ethical brand
-              medications from India since 2012, with a focus on reliable
-              service, competitive pricing and international shipping.
+              {siteConfig.name} has supplied generic medicines and ethical-brand
+              medications from India since {siteConfig.founded}, with a focus on
+              reliable service, competitive pricing and international shipping.
             </p>
           </div>
 
-          <nav className="footer-links-block" aria-label="Footer navigation">
+          <nav aria-label="Footer navigation" className="footer-links-block">
             <span className="footer-heading">Quick links</span>
-            <a href="#home">Home</a>
-            <a href="#about">About Us</a>
-            <a href="#catalog">Pharmaceutical Catalog</a>
-            <a href="#faq">FAQs &amp; Shipping Information</a>
-            <a href="#contact">Contact Us</a>
+            {siteConfig.navigation.map((item) => (
+              <a href={item.href} key={item.href}>
+                {item.footerLabel}
+              </a>
+            ))}
           </nav>
 
           <div className="footer-contact-block">
             <span className="footer-heading">Contact us</span>
             <div className="footer-contact-item">
               <span>Phone</span>
-              <a href={`tel:${PHONE_NUMBER.replaceAll(" ", "")}`}>
+              <a href={siteConfig.contact.phoneHref}>
                 <Phone aria-hidden="true" size={15} />
-                {PHONE_NUMBER}
+                {siteConfig.contact.phone}
               </a>
             </div>
             <div className="footer-contact-item">
               <span>Email</span>
-              <a href={`mailto:${EMAIL_ADDRESS}`}>
+              <a href={siteConfig.contact.emailHref}>
                 <Mail aria-hidden="true" size={15} />
-                {EMAIL_ADDRESS}
+                {siteConfig.contact.email}
               </a>
             </div>
             <div className="footer-contact-item">
               <span>Support hours</span>
-              <strong>Monday – Saturday · 9:00 AM – 8:00 PM IST</strong>
+              <strong>{siteConfig.contact.supportHours}</strong>
             </div>
             <a
               className="footer-whatsapp-link"
-              href={WHATSAPP_URL}
-              target="_blank"
+              href={siteConfig.contact.whatsappHref}
               rel="noreferrer"
+              target="_blank"
             >
               <MessageCircle aria-hidden="true" size={15} />
               Responsive support
@@ -252,7 +245,9 @@ export function AboutContactSection() {
         </div>
 
         <div className="site-container footer-bottom">
-          <span>© 2026 PCT24X7. All rights reserved.</span>
+          <span>
+            © {siteConfig.copyrightYear} {siteConfig.name}. All rights reserved.
+          </span>
           <a href="#contact">Contact support</a>
         </div>
       </footer>

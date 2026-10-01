@@ -1,3 +1,4 @@
+import { siteConfig } from "@/config/site"
 import { normalizeCatalogData, type CatalogProduct } from "./catalog-format"
 
 const CATALOG_MAGIC = "PCTCAT1:"
@@ -38,7 +39,7 @@ export async function fetchCatalogData(
   let payload = responseBytes
 
   if (responseMagic === CATALOG_MAGIC) {
-    const key = process.env.NEXT_PUBLIC_CATALOG_XOR_KEY
+    const key = siteConfig.catalog.xorKey
 
     if (!key) {
       throw new Error(

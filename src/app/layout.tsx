@@ -1,18 +1,18 @@
-/* eslint-disable @next/next/no-page-custom-font -- Hosted Google Fonts keep Cloudflare builds independent of Google Fonts availability. */
 import type { Metadata } from "next"
 
 import { SiteHeader } from "@/components/site-header"
+import { ThemeProvider } from "@/components/theme-provider"
+import { siteConfig } from "@/config/site"
 import "@/styles/main.css"
 
 export const metadata: Metadata = {
   title: {
-    default: "PCT24X7 | Pharmaceutical Healthcare",
-    template: "%s | PCT24X7",
+    default: `${siteConfig.name} | ${siteConfig.tagline}`,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    "PCT24X7 supplies generic medicines and ethical brand medications from India. Browse the pharmaceutical catalog or contact our team for ordering assistance.",
+  description: siteConfig.description,
   keywords: [
-    "PCT24X7",
+    siteConfig.name,
     "pharmaceutical catalog",
     "generic medicines",
     "healthcare supply",
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -38,12 +38,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
-        <SiteHeader />
-        {children}
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+        <ThemeProvider>
+          <SiteHeader />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
 }
-
-/* eslint-enable @next/next/no-page-custom-font */

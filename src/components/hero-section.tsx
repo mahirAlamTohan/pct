@@ -1,84 +1,134 @@
 "use client"
 
 import Image from "next/image"
+import {
+  ArrowDown,
+  ArrowRight,
+  Mail,
+  MessageCircle,
+  ShieldCheck,
+} from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
-import { ArrowDown, Mail, MessageCircle, ShieldCheck } from "lucide-react"
 
-import heroImage from "@/images/hero.png"
-
-const WHATSAPP_URL = "https://wa.me/918766267499"
-const EMAIL_ADDRESS = "shop@pct24x7.store"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { siteConfig } from "@/config/site"
+import heroImage from "@/images/hero-visual.webp"
 
 export function HeroSection() {
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <motion.section
+    <section
+      aria-label={`${siteConfig.name} healthcare`}
       className="hero-section"
       id="home"
-      aria-label="PCT24X7 healthcare"
-      initial={false}
-      animate={prefersReducedMotion ? undefined : { opacity: 1 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
     >
-      <h1 className="sr-only">
-        PCT24X7 — Quality medicines. Better healthcare.
-      </h1>
-      <motion.div
-        className="hero-image-frame"
-        initial={prefersReducedMotion ? false : { opacity: 0, scale: 1.012 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }}
-        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-      >
+      <div className="hero-image-frame">
         <Image
-          src={heroImage}
-          alt="Quality medicines and pharmaceutical care from PCT24X7, your trusted healthcare partner since 2012."
+          alt=""
+          aria-hidden="true"
           className="hero-image"
           fill
           priority
           sizes="100vw"
+          src={heroImage}
         />
-        <span className="hero-image-tag">
-          <ShieldCheck aria-hidden="true" size={15} />
-          Quality you can trust
-        </span>
-      </motion.div>
+        <div aria-hidden="true" className="hero-image-scrim" />
 
-      <motion.div
-        className="hero-contact-card site-container"
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-        animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, delay: 0.18, ease: "easeOut" }}
-      >
+        <div className="site-container hero-content">
+          <motion.div
+            animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+            className="hero-copy"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span className="hero-kicker inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-4 py-2 text-[0.68rem] font-extrabold tracking-[0.13em] text-primary shadow-sm backdrop-blur-xl">
+              <ShieldCheck aria-hidden="true" size={16} />
+              Trusted healthcare partner since {siteConfig.founded}
+            </span>
+            <h1 className="leading-1.02 font-sans text-5xl font-extrabold tracking-[-0.07em] text-balance text-foreground sm:text-6xl lg:text-7xl">
+              Quality medicines.
+              <br />
+              <span>Better healthcare.</span>
+            </h1>
+            <p className="hero-description max-w-xl text-base leading-7 text-pretty text-muted-foreground sm:text-lg sm:leading-8">
+              Reliable access to generic and ethical-brand medicines, backed by
+              thoughtful service and international shipping from India.
+            </p>
+            <div className="hero-actions flex flex-wrap items-center gap-3">
+              <Button asChild className="hero-primary-button" size="lg">
+                <a
+                  href={siteConfig.contact.whatsappHref}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <MessageCircle aria-hidden="true" />
+                  Talk to our team
+                  <ArrowRight aria-hidden="true" />
+                </a>
+              </Button>
+              <Button
+                asChild
+                className="hero-secondary-button"
+                size="lg"
+                variant="outline"
+              >
+                <a href="#catalog">
+                  Explore catalog
+                  <ArrowDown aria-hidden="true" />
+                </a>
+              </Button>
+            </div>
+            <div
+              aria-label={`${siteConfig.name} service highlights`}
+              className="hero-proof-row flex flex-wrap items-center gap-3 text-xs font-semibold text-muted-foreground"
+            >
+              <span>
+                <ShieldCheck aria-hidden="true" size={15} />
+                Quality focused
+              </span>
+              <span>·</span>
+              <span>Worldwide shipping</span>
+            </div>
+          </motion.div>
+        </div>
+
+        <div
+          aria-hidden="true"
+          className="hero-image-tag inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 text-xs font-semibold text-primary shadow-lg backdrop-blur-xl"
+        >
+          <ShieldCheck size={15} />
+          Carefully sourced healthcare
+        </div>
+      </div>
+
+      <Card className="site-container hero-contact-card">
         <div className="hero-contact-copy">
           <span className="eyebrow eyebrow-small">
             Here for your healthcare needs
           </span>
-          <p>You can contact us to order medicines via WhatsApp and Email.</p>
+          <p>For product availability and orders, contact our team directly.</p>
         </div>
         <div className="hero-contact-actions">
-          <a
-            className="button button-primary"
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <MessageCircle aria-hidden="true" size={17} />
-            WhatsApp us
-          </a>
-          <a className="button button-light" href={`mailto:${EMAIL_ADDRESS}`}>
-            <Mail aria-hidden="true" size={17} />
-            Email us
-          </a>
-          <a
-            className="scroll-cue"
-            href="#catalog"
-            aria-label="Explore the pharmaceutical catalog"
-          >
-            <ArrowDown aria-hidden="true" size={17} />
-          </a>
+          <Button asChild className="button-primary" size="sm">
+            <a
+              href={siteConfig.contact.whatsappHref}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <MessageCircle aria-hidden="true" />
+              WhatsApp us
+            </a>
+          </Button>
+          <Button asChild className="button-light" size="sm" variant="outline">
+            <a href={siteConfig.contact.emailHref}>
+              <Mail aria-hidden="true" />
+              Email us
+            </a>
+          </Button>
         </div>
-      </motion.div>
-    </motion.section>
+      </Card>
+    </section>
   )
 }

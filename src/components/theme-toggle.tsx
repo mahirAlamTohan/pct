@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button"
+import { siteContent } from "@/config/content"
 import { cn } from "@/lib/utils"
 
 interface ThemeToggleProps {
@@ -15,20 +16,20 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
   return (
     <Button
-      aria-label="Toggle color theme"
+      aria-label={siteContent.ui.themeToggleLabel}
       className={cn("shrink-0", className)}
       onClick={() => {
         const isDark = document.documentElement.classList.contains("dark")
         setTheme(isDark ? "light" : "dark")
       }}
       size="icon"
-      title="Toggle color theme"
+      title={siteContent.ui.themeToggleLabel}
       type="button"
       variant="ghost"
     >
       <Moon aria-hidden="true" className="dark:hidden" />
       <Sun aria-hidden="true" className="hidden dark:block" />
-      <span className="sr-only">Toggle color theme</span>
+      <span className="sr-only">{siteContent.ui.themeToggleLabel}</span>
     </Button>
   )
 }

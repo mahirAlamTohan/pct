@@ -1,0 +1,142 @@
+export interface FAQItem {
+  question: string
+  answer: string
+}
+
+export interface SiteContent {
+  ui: {
+    brandCaption: string
+    headerIntro: string
+    phoneFallback: string
+    emailFallback: string
+    chatAction: string
+    themeToggleLabel: string
+    mainNavigationLabel: string
+    mobileNavigationLabel: string
+    footerNavigationLabel: string
+  }
+  hero: {
+    eyebrow: string
+    title: string
+    titleAccent: string
+    description: string
+    proofPrimary: string
+    proofSecondary: string
+    imageBadge: string
+    contactEyebrow: string
+    contactDescription: string
+    primaryAction: string
+    secondaryAction: string
+    whatsappAction: string
+    emailAction: string
+  }
+  catalog: {
+    eyebrow: string
+    title: string
+    description: string
+    overline: string
+    cardTitle: string
+    cardDescription: string
+    searchLabel: string
+    searchPlaceholder: string
+    searchHelp: string
+    clearSearchAction: string
+    facetModeAriaLabel: string
+    facetSearchAriaLabel: string
+    fullCatalogLabel: string
+    searchNowLabel: string
+    loadErrorAdvice: string
+    paginationLabel: string
+    filtersAction: string
+    priceRangeTitle: string
+    priceUnit: string
+    minimumPriceLabel: string
+    maximumPriceLabel: string
+    minimumPriceAriaLabel: string
+    maximumPriceAriaLabel: string
+    noMinimumPrice: string
+    noMaximumPrice: string
+    priceLimitHelp: string
+    manufacturerLabel: string
+    packagingLabel: string
+    includeSelected: string
+    excludeSelected: string
+    selectedCount: string
+    facetSearchPlaceholder: string
+    noFacetValues: string
+    noFacetMatches: string
+    clearFiltersAction: string
+    downloadAction: string
+    openCatalogAction: string
+    productSingular: string
+    productPlural: string
+    searchableProducts: string
+    tableHeadings: {
+      serial: string
+      ingredient: string
+      product: string
+      packaging: string
+      manufacturer: string
+      rate: string
+    }
+    status: {
+      preview: string
+      loading: string
+      loaded: string
+      error: string
+    }
+    emptyTitle: string
+    emptyDescription: string
+    noProducts: string
+    summaryShowing: string
+    summaryOf: string
+    previousPage: string
+    nextPage: string
+    previousPageAriaLabel: string
+    nextPageAriaLabel: string
+    sourceNote: string
+  }
+  faq: {
+    eyebrow: string
+    title: string
+    description: string
+    contactPrompt: string
+    items: FAQItem[]
+  }
+  about: {
+    eyebrow: string
+    title: string
+    description: string
+    highlights: string[]
+    sinceLabel: string
+    serviceTitle: string
+    serviceRegions: string
+    serviceDescription: string
+  }
+  contact: {
+    eyebrow: string
+    title: string
+    description: string
+    whatsappLabel: string
+    phoneLabel: string
+    emailLabel: string
+    supportHoursLabel: string
+    phoneFallback: string
+    emailFallback: string
+    supportHoursFallback: string
+    supportCallout: string
+  }
+  footer: {
+    kicker: string
+    description: string
+    navigationHeading: string
+    contactHeading: string
+    serviceItems: {
+      title: string
+      description: string
+    }[]
+    noticeHeading: string
+    notice: string
+    supportLink: string
+  }
+}

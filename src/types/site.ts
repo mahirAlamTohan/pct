@@ -1,0 +1,29 @@
+export interface NavigationItem {
+  label: string
+  mobileLabel: string
+  footerLabel: string
+  href: string
+}
+
+export interface SiteConfig {
+  name: string
+  tagline: string
+  description: string
+  founded: number
+  copyrightYear: number
+  navigation: readonly NavigationItem[]
+  contact: {
+    phone: string
+    phoneHref: string
+    whatsappNumber: string
+    whatsappHref: string
+    email: string
+    emailHref: string
+    supportHours: string
+  }
+  catalog: {
+    dataUrl: string
+    xorKey: string
+    pdfUrl: string
+  }
+}

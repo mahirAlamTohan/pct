@@ -1,7 +1,9 @@
 import { siteConfig } from "@/config/site"
-import { normalizeCatalogData, type CatalogProduct } from "./catalog-format"
+import { normalizeCatalogData } from "@/data/catalog-format"
+import type { CatalogDataset } from "@/types/catalog"
 
-const CATALOG_MAGIC = "PCTCAT1:"
+const CATALOG_MAGIC_V1 = "PCTCAT1:"
+const CATALOG_MAGIC_V2 = "PCTCAT2:"
 
 function xorDecode(bytes: Uint8Array, key: string) {
   const keyBytes = new TextEncoder().encode(key)
@@ -18,7 +20,7 @@ function xorDecode(bytes: Uint8Array, key: string) {
 export async function fetchCatalogData(
   url: string,
   signal?: AbortSignal
-): Promise<CatalogProduct[]> {
+): Promise<CatalogDataset> {
   const response = await fetch(url, {
     cache: "force-cache",
     credentials: "omit",
@@ -34,11 +36,13 @@ export async function fetchCatalogData(
 
   const responseBytes = new Uint8Array(await response.arrayBuffer())
   const responseMagic = new TextDecoder().decode(
-    responseBytes.subarray(0, CATALOG_MAGIC.length)
+    responseBytes.subarray(0, CATALOG_MAGIC_V2.length)
   )
+  const isObfuscated =
+    responseMagic === CATALOG_MAGIC_V1 || responseMagic === CATALOG_MAGIC_V2
   let payload = responseBytes
 
-  if (responseMagic === CATALOG_MAGIC) {
+  if (isObfuscated) {
     const key = siteConfig.catalog.xorKey
 
     if (!key) {
@@ -47,7 +51,7 @@ export async function fetchCatalogData(
       )
     }
 
-    payload = xorDecode(responseBytes.slice(CATALOG_MAGIC.length), key)
+    payload = xorDecode(responseBytes.slice(CATALOG_MAGIC_V2.length), key)
   }
 
   const isGzipPayload = payload[0] === 0x1f && payload[1] === 0x8b
@@ -58,8 +62,7 @@ export async function fetchCatalogData(
       throw new Error("This browser does not support gzip catalog downloads.")
     }
 
-    const gzipBuffer = payload.buffer
-    const stream = new Blob([gzipBuffer])
+    const stream = new Blob([payload.buffer])
       .stream()
       .pipeThrough(new DecompressionStream("gzip"))
     jsonText = await new Response(stream).text()

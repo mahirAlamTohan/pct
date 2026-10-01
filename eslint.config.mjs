@@ -4,6 +4,7 @@ import comments from "@eslint-community/eslint-plugin-eslint-comments/configs"
 import react from "@eslint-react/eslint-plugin"
 import js from "@eslint/js"
 import pluginNext from "@next/eslint-plugin-next"
+import reactCompiler from "eslint-plugin-react-compiler"
 import prettierConfig from "eslint-config-prettier"
 import diff from "eslint-plugin-diff"
 import eslintPluginImportX from "eslint-plugin-import-x"
@@ -17,7 +18,13 @@ import tseslint from "typescript-eslint"
 
 export default defineConfig([
   // Global ignores
-  globalIgnores([".next", "node_modules"]),
+  globalIgnores([
+    ".next",
+    "out",
+    "node_modules",
+    "scripts/**/*.mjs",
+    "eslint.config.mjs",
+  ]),
 
   // Base ESLint + TypeScript
   js.configs.recommended,
@@ -64,10 +71,10 @@ export default defineConfig([
   react.configs["recommended-type-checked"],
 
   // Tailwind
-  ...tailwind.configs["flat/recommended"],
+  tailwind.configs.recommended,
 
   // Git Diff
-  ...diff.configs["flat/recommended"],
+  ...diff.configs["flat/diff"],
 
   // Main config block
   {
@@ -89,8 +96,12 @@ export default defineConfig([
         ...globals.node,
       },
     },
+    plugins: {
+      "react-compiler": reactCompiler,
+    },
     settings: {
       tailwindcss: {
+        cssConfigPath: "./src/styles/main.css",
         callees: ["classnames", "clsx", "ctl", "cn", "cva"],
       },
       react: {
@@ -98,6 +109,7 @@ export default defineConfig([
       },
     },
     rules: {
+      "tailwindcss/no-custom-classname": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },

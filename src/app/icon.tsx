@@ -1,16 +1,15 @@
-// app/icon.tsx
 import { ImageResponse } from "next/og"
 
-// Route segment config (tells Next.js to use standard icon size)
+export const dynamic = "force-static"
 export const size = {
-  width: 32,
-  height: 32,
+  width: 64,
+  height: 64,
 }
+
 export const contentType = "image/png"
 
 export default function Icon() {
   return new ImageResponse(
-    // This Tailwind CSS setup mimics your custom background gradient
     <div
       style={{
         width: "100%",
@@ -18,28 +17,16 @@ export default function Icon() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "radial-gradient(at 25% 25%, #0e7490 50%, #22c55e 100%)",
-        borderRadius: "6px",
+        borderRadius: "18px",
+        background: "linear-gradient(145deg, #2a80ec, #1648a3)",
+        color: "white",
+        fontSize: 25,
+        fontWeight: 800,
+        letterSpacing: "-2px",
       }}
     >
-      {/* Simplified SVG Path of the Lucide Pill component */}
-      <svg
-        xmlns="http://w3.org"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#f9fafb"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-        <path d="m8.5 8.5 7 7" />
-      </svg>
+      PCT
     </div>,
-    {
-      ...size,
-    }
+    size
   )
 }

@@ -18,6 +18,9 @@
 # production
 /build
 
+# Generated CDN catalog artifacts (upload these; do not commit them)
+catalog.*.dat
+
 # misc
 .DS_Store
 *.pem
@@ -28,8 +31,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (the example template is safe to commit)
 .env*
+!.env.example
 
 # typescript
 *.tsbuildinfo

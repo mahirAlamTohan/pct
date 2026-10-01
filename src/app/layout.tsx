@@ -1,27 +1,23 @@
-import { Geist, Geist_Mono, Noto_Sans } from "next/font/google"
-
-import Header from "@/components/custom/header"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils"
-import "@/styles/main.css"
+/* eslint-disable @next/next/no-page-custom-font -- Hosted Google Fonts keep Cloudflare builds independent of Google Fonts availability. */
 import type { Metadata } from "next"
+
+import { SiteHeader } from "@/components/site-header"
+import "@/styles/main.css"
 
 export const metadata: Metadata = {
   title: {
-    default: "PCT",
-    template: "%s | PCT",
+    default: "PCT24X7 | Pharmaceutical Healthcare",
+    template: "%s | PCT24X7",
   },
-  description: "Welcome to PCT.",
+  description:
+    "PCT24X7 supplies generic medicines and ethical brand medications from India. Browse the pharmaceutical catalog or contact our team for ordering assistance.",
+  keywords: [
+    "PCT24X7",
+    "pharmaceutical catalog",
+    "generic medicines",
+    "healthcare supply",
+  ],
 }
-
-const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" })
-
-const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" })
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
 
 export default function RootLayout({
   children,
@@ -29,23 +25,25 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        notoSans.variable,
-        geistHeading.variable
-      )}
-    >
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
-        <ThemeProvider>
-          <Header />
-          {children}
-        </ThemeProvider>
+        <SiteHeader />
+        {children}
       </body>
     </html>
   )
 }
+
+/* eslint-enable @next/next/no-page-custom-font */

@@ -20,6 +20,8 @@ bun run lint
 bun run build
 ```
 
+For the complete local verification workflow (including the auto-managed Playwright server, browser setup, and test reports), see [TESTING.md](./TESTING.md).
+
 ## UI, theme and configuration
 
 - Tailwind CSS v4 is the styling foundation. `components.json` is configured for shadcn's Base UI primitives; the project does not use Radix UI.

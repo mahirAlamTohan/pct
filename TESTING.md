@@ -1,5 +1,20 @@
 # Testing
 
+## After pulling: run the complete local suite
+
+Install the project dependencies, then run the single full-suite command:
+
+```sh
+npm install --no-package-lock --no-audit --no-fund
+npm run test:all
+```
+
+`test:all` generates Next.js route types, builds the production static export, runs ESLint, TypeScript checks, unit/component tests, and then the Chromium end-to-end suite. It continues through every stage and records failures instead of stopping at the first one. If the Playwright-managed Chromium browser is missing, the E2E runner installs it automatically on first use. Playwright starts and stops the local static test server; no separate server terminal is needed. The tests use local, synthetic catalog fixtures and do not send test traffic to production.
+
+The run prints results in the terminal and writes `test-results/full-suite-summary.txt` and `.json`, `playwright-report/index.html`, and `test-results/e2e-results.json`. On browser-test failures, screenshots, traces, and other artifacts are also saved under `test-results/`; share the full-suite summary and E2E JSON/report for review. You can open the HTML report with `npx playwright show-report`.
+
+The E2E build deliberately writes test-only catalog settings to `out/`. Do **not** deploy that output. Run `npm run build` again after testing to generate a production-configured export.
+
 ## Unit and component tests
 
 ```sh
@@ -11,21 +26,15 @@ Vitest runs the data-format/fetch tests and React component tests in jsdom. The 
 
 ## Browser and accessibility tests
 
-Install the Playwright browser once if it is not already available:
-
-```sh
-npx playwright install chromium
-```
-
-Then run:
+To run just the end-to-end browser suite:
 
 ```sh
 npm run test:e2e
 ```
 
-This builds the static export with a test-only catalog URL/key, serves it on loopback, and runs Playwright against Chromium. Browser routes supply in-memory catalog fixtures; the test suite does not fetch production catalog artifacts. Axe checks WCAG 2.2 A/AA rules on the catalog page with filters open. The build's public-data guard still runs, and temporary raw catalog JSON must not be left under `public/data`.
+The runner checks for Playwright's Chromium browser and installs it if needed, builds the static export with a test-only catalog URL/key, and lets Playwright start and stop the loopback server. No separate server terminal is needed. Tests cover fuzzy manufacturer search, include/exclude filters, mobile header and light/dark styling, catalog failure behavior, WCAG 2.2 A/AA checks through Axe, and reopening the app shell offline. Browser routes supply in-memory catalog fixtures; tests do not fetch production catalog artifacts. The public-data guard still runs, and temporary raw catalog JSON must not be left under `public/data`.
 
-`npm run test:all` runs lint, type checking, unit/component tests, and the browser suite. It requires the Playwright browser installation above.
+The Playwright report and JSON results are saved under `playwright-report/` and `test-results/`. The E2E build uses test-only settings and overwrites `out/`; regenerate a production build before deploying.
 
 ## Bounded local load smoke test
 

@@ -16,7 +16,11 @@ import { Container } from "@/components/ui/container"
 import { siteConfig } from "@/config/site"
 import { siteContent } from "@/config/content"
 
-const serviceIcons = [MessageCircle, Globe2, ShieldCheck]
+const serviceIcons = [
+  <MessageCircle aria-hidden="true" className="size-[17px]" key="message" />,
+  <Globe2 aria-hidden="true" className="size-[17px]" key="globe" />,
+  <ShieldCheck aria-hidden="true" className="size-[17px]" key="shield" />,
+]
 
 function replaceSiteTokens(value: string) {
   return value
@@ -307,24 +311,23 @@ export function AboutContactSection() {
         </Container>
 
         <Container className="grid gap-5 border-y border-footer-border py-5 sm:grid-cols-3 sm:gap-4">
-          {footer.serviceItems.map((item, index) => {
-            const Icon = serviceIcons.at(index) ?? ShieldCheck
-            return (
-              <div className="flex items-center gap-3" key={item.title}>
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-footer-border bg-footer-card text-footer-accent">
-                  <Icon aria-hidden="true" className="size-[17px]" />
-                </span>
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <strong className="text-[0.7rem] font-extrabold text-footer-foreground">
-                    {item.title}
-                  </strong>
-                  <small className="text-[0.62rem] leading-5 text-footer-muted">
-                    {item.description}
-                  </small>
-                </span>
-              </div>
-            )
-          })}
+          {footer.serviceItems.map((item, index) => (
+            <div className="flex items-center gap-3" key={item.title}>
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-footer-border bg-footer-card text-footer-accent">
+                {serviceIcons.at(index) ?? (
+                  <ShieldCheck aria-hidden="true" className="size-[17px]" />
+                )}
+              </span>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <strong className="text-[0.7rem] font-extrabold text-footer-foreground">
+                  {item.title}
+                </strong>
+                <small className="text-[0.62rem] leading-5 text-footer-muted">
+                  {item.description}
+                </small>
+              </span>
+            </div>
+          ))}
         </Container>
 
         <Container className="mt-5 grid gap-2 rounded-xl border border-l-[3px] border-footer-border border-l-footer-accent bg-footer-card/70 px-4 py-3 sm:grid-cols-[130px_minmax(0,1fr)] sm:gap-4">

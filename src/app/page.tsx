@@ -4,16 +4,12 @@ import { FAQSection } from "@/components/faq-section"
 import { FloatingActions } from "@/components/floating-actions"
 import { HeroSection } from "@/components/hero-section"
 import { siteConfig } from "@/config/site"
-import { CATALOG_PRODUCTS } from "@/data/catalog"
 
 export default function HomePage() {
   return (
     <main>
       <HeroSection />
-      <CatalogExplorer
-        products={CATALOG_PRODUCTS}
-        catalogDataUrl={siteConfig.catalog.dataUrl}
-      />
+      <CatalogExplorer catalogDataUrl={siteConfig.catalog.dataUrl} />
       <FAQSection />
       <AboutContactSection />
       <FloatingActions />

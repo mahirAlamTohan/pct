@@ -113,6 +113,9 @@ Desktop.ini
 # Containerization & Deployment Artifacts
 # ==========================================
 catalog.*.dat
+manufacturers.*.dat
+packaging.*.dat
+/extras/
 .docker
 *.tar
 *.gz

@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto"
 import { existsSync, readFileSync } from "node:fs"
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises"
 import { gzipSync } from "node:zlib"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -17,11 +17,25 @@ const FIELD_ALIASES = {
   content: [
     "content",
     "active ingredient",
+    "active ingredients",
     "activeingredient",
     "ingredient",
+    "generic name",
+    "composition",
+    "drug content",
     "salt",
   ],
-  product: ["product", "product name", "productname", "brand name", "brand"],
+  product: [
+    "product",
+    "product name",
+    "productname",
+    "brand name",
+    "brand",
+    "medicine name",
+    "item name",
+    "drug name",
+    "name",
+  ],
   packSize: ["pack size", "packsize", "packaging", "package", "pack"],
   rate: [
     "rate (usd)",
@@ -55,6 +69,7 @@ function printUsage() {
 PowerShell example:
   node .\\scripts\\build-catalog.mjs --input "C:\\data\\Price List.json" --output "C:\\data\\catalog-output"
 
+The builder writes catalog.<version>.dat, manufacturers.<version>.dat, and packaging.<version>.dat.
 The XOR key is read from ${XOR_KEY_NAME} in the repository .env file or process environment.`)
 }
 
@@ -229,6 +244,11 @@ function normalizeRows(parsedJson) {
   const manufacturerIndexes = new Map()
   const packagingIndexes = new Map()
   let skippedRows = 0
+  let nonRecordRows = 0
+  let missingProductNames = 0
+  let missingIngredients = 0
+  const skippedExamples = { nonObject: [], missingProductName: [] }
+  const missingIngredientExamples = []
 
   function dictionaryIndex(value, values, indexes) {
     const text = asText(value)
@@ -244,18 +264,41 @@ function normalizeRows(parsedJson) {
     return index
   }
 
-  for (const row of sourceRows) {
+  for (const [rowIndex, row] of sourceRows.entries()) {
     if (!isRecord(row)) {
       skippedRows += 1
+      nonRecordRows += 1
+      if (skippedExamples.nonObject.length < 5) {
+        skippedExamples.nonObject.push({ row: rowIndex + 1 })
+      }
       continue
     }
 
     const content = asText(findField(row, FIELD_ALIASES.content))
     const product = asText(findField(row, FIELD_ALIASES.product))
 
-    if (!content || !product) {
+    if (!product) {
       skippedRows += 1
+      missingProductNames += 1
+      if (skippedExamples.missingProductName.length < 5) {
+        skippedExamples.missingProductName.push({
+          row: rowIndex + 1,
+          activeIngredient: content.slice(0, 100),
+          sourceFields: Object.keys(row).slice(0, 8),
+        })
+      }
       continue
+    }
+
+    if (!content) {
+      missingIngredients += 1
+      if (missingIngredientExamples.length < 5) {
+        missingIngredientExamples.push({
+          row: rowIndex + 1,
+          product: product.slice(0, 100),
+          sourceFields: Object.keys(row).slice(0, 8),
+        })
+      }
     }
 
     const manufacturer = asText(findField(row, FIELD_ALIASES.manufacturer))
@@ -284,7 +327,7 @@ function normalizeRows(parsedJson) {
 
   if (products.length === 0) {
     throw new Error(
-      "No valid products were found. Expected Content and Product fields (or supported aliases)."
+      "No valid products were found. A Product Name (or supported alias) is required; Active Ingredient may be blank."
     )
   }
 
@@ -315,12 +358,19 @@ function normalizeRows(parsedJson) {
   return {
     catalog: {
       metadata: { minPrice, maxPrice },
-      manufacturers,
-      packaging,
       products,
     },
+    manufacturers: { kind: "manufacturers", values: manufacturers },
+    packaging: { kind: "packaging", values: packaging },
+    manufacturerCount: manufacturers.length,
+    packagingCount: packaging.length,
     sourceRows: sourceRows.length,
     skippedRows,
+    nonRecordRows,
+    missingProductNames,
+    missingIngredients,
+    skippedExamples,
+    missingIngredientExamples,
   }
 }
 function xorBytes(bytes, keyBytes) {
@@ -333,17 +383,29 @@ function xorBytes(bytes, keyBytes) {
   return result
 }
 
-async function writeVersionedCatalog(outputDirectory, payload) {
+async function writeVersionedArtifacts(outputDirectory, payloads) {
   for (;;) {
     const version = randomBytes(3).toString("hex")
-    const fileName = `catalog.${version}.dat`
-    const outputPath = path.join(outputDirectory, fileName)
+    const files = payloads.map(({ name, payload }) => ({
+      fileName: `${name}.${version}.dat`,
+      outputPath: path.join(outputDirectory, `${name}.${version}.dat`),
+      payload,
+    }))
+    const createdPaths = []
 
     try {
-      await writeFile(outputPath, payload, { flag: "wx" })
-      return { version, fileName, outputPath }
+      for (const file of files) {
+        await writeFile(file.outputPath, file.payload, { flag: "wx" })
+        createdPaths.push(file.outputPath)
+      }
+
+      return { version, files }
     } catch (error) {
-      if (error?.code !== "EEXIST") throw error
+      await Promise.all(
+        createdPaths.map((outputPath) => unlink(outputPath).catch(() => {}))
+      )
+      if (error?.code === "EEXIST") continue
+      throw error
     }
   }
 }
@@ -390,35 +452,92 @@ async function main() {
     throw new Error(`Could not parse input JSON: ${message}`)
   }
 
-  const { catalog, sourceRows, skippedRows } = normalizeRows(parsedJson)
-  const jsonBytes = Buffer.from(JSON.stringify(catalog), "utf8")
-  const gzipBytes = gzipSync(jsonBytes, { level: 9 })
-  const encryptedPayload = xorBytes(gzipBytes, keyBytes)
-  const outputPayload = Buffer.concat([FILE_MAGIC, encryptedPayload])
+  const {
+    catalog,
+    manufacturers,
+    packaging,
+    manufacturerCount,
+    packagingCount,
+    sourceRows,
+    skippedRows,
+    nonRecordRows,
+    missingProductNames,
+    missingIngredients,
+    skippedExamples,
+    missingIngredientExamples,
+  } = normalizeRows(parsedJson)
+  const payloads = [
+    { name: "catalog", value: catalog },
+    { name: "manufacturers", value: manufacturers },
+    { name: "packaging", value: packaging },
+  ].map(({ name, value }) => {
+    const jsonBytes = Buffer.from(JSON.stringify(value), "utf8")
+    const gzipBytes = gzipSync(jsonBytes, { level: 9 })
+    const encryptedPayload = xorBytes(gzipBytes, keyBytes)
+
+    return {
+      name,
+      jsonBytes,
+      payload: Buffer.concat([FILE_MAGIC, encryptedPayload]),
+    }
+  })
 
   await mkdir(output, { recursive: true })
-  const result = await writeVersionedCatalog(output, outputPayload)
+  const result = await writeVersionedArtifacts(output, payloads)
+  const filesByName = new Map(
+    result.files.map((file) => [
+      path.basename(file.outputPath, `.${result.version}.dat`),
+      file,
+    ])
+  )
 
   console.log("Catalog build complete")
   console.log(`Version: ${result.version}`)
-  console.log(`File: ${result.fileName}`)
-  console.log(`Output: ${result.outputPath}`)
+  console.log(`Output folder: ${output}`)
+  for (const name of ["catalog", "manufacturers", "packaging"]) {
+    const file = filesByName.get(name)
+    if (file) {
+      console.log(
+        `${name}: ${file.fileName} (${file.payload.length.toLocaleString()} bytes)`
+      )
+    }
+  }
   console.log(`Rows: ${catalog.products.length.toLocaleString()} normalized`)
   console.log(
-    `Rows skipped: ${skippedRows.toLocaleString()} of ${sourceRows.toLocaleString()}`
+    `Rows skipped: ${skippedRows.toLocaleString()} of ${sourceRows.toLocaleString()} (${nonRecordRows.toLocaleString()} non-object rows; ${missingProductNames.toLocaleString()} missing Product Name)`
   )
   console.log(
-    `Dictionary values: ${catalog.manufacturers.length.toLocaleString()} manufacturers, ${catalog.packaging.length.toLocaleString()} packaging options`
+    `Rows retained without Active Ingredient: ${missingIngredients.toLocaleString()}`
+  )
+  if (missingIngredientExamples.length > 0) {
+    console.log(
+      `Rows missing Active Ingredient samples: ${JSON.stringify(missingIngredientExamples)}`
+    )
+  }
+  if (skippedExamples.missingProductName.length > 0) {
+    console.log(
+      `Rows skipped for missing Product Name samples: ${JSON.stringify(skippedExamples.missingProductName)}`
+    )
+  }
+  if (skippedExamples.nonObject.length > 0) {
+    console.log(
+      `Non-object row samples: ${JSON.stringify(skippedExamples.nonObject)}`
+    )
+  }
+  console.log(
+    `Dictionary values: ${manufacturerCount.toLocaleString()} manufacturers, ${packagingCount.toLocaleString()} packaging options`
   )
   console.log(
     `Price metadata: USD ${catalog.metadata.minPrice.toFixed(2)}–${catalog.metadata.maxPrice.toFixed(2)}`
   )
-  console.log(`Normalized JSON: ${jsonBytes.length.toLocaleString()} bytes`)
   console.log(
-    `Gzip + XOR artifact: ${outputPayload.length.toLocaleString()} bytes`
+    `Normalized JSON: ${payloads
+      .map(({ jsonBytes }) => jsonBytes.length)
+      .reduce((total, size) => total + size, 0)
+      .toLocaleString()} bytes total`
   )
   console.log(
-    "The version is random; upload this file and update the website catalog URL."
+    "Upload all three version-matched files to the same data folder; set NEXT_PUBLIC_CATALOG_DATA_URL to the catalog file URL."
   )
 }
 

@@ -47,8 +47,6 @@ export const siteContent = {
     searchPlaceholder: "Search by ingredient, product, pack…",
     searchHelp:
       "Fuzzy search checks active ingredient, product, pack size, rate and manufacturer.",
-    clearSearchAction: "Clear search",
-    facetModeAriaLabel: "{label} selection mode",
     facetSearchAriaLabel: "Search {label} filters",
     fullCatalogLabel: "full catalog",
     searchNowLabel: "searchable now",
@@ -57,8 +55,6 @@ export const siteContent = {
     paginationLabel: "Catalog pagination",
     filtersAction: "Filters",
     closeFiltersAction: "Close filters",
-    facetSearchAllAriaLabel: "Search manufacturers and packaging",
-    facetSearchAllPlaceholder: "Search manufacturers or packaging…",
     includedFiltersTitle: "Including filters",
     excludedFiltersTitle: "Excluding filters",
     noIncludedFilters: "Tap a pill to include it.",
@@ -72,8 +68,6 @@ export const siteContent = {
     maximumPriceLabel: "Maximum",
     minimumPriceAriaLabel: "Minimum price in US dollars",
     maximumPriceAriaLabel: "Maximum price in US dollars",
-    noMinimumPrice: "No minimum",
-    noMaximumPrice: "No maximum",
     priceLimitHelp:
       "Drag the handles or use the arrow keys to adjust the USD range.",
     manufacturerLabel: "Manufacturer",
@@ -81,7 +75,7 @@ export const siteContent = {
     includeSelected: "Include",
     excludeSelected: "Exclude",
     selectedCount: "{count} selected",
-    facetSearchPlaceholder: "Find {label}…",
+    facetSearchPlaceholder: "Search {label}…",
     noFacetValues: "No values available in this catalog.",
     noFacetMatches: "No matching values.",
     clearFiltersAction: "Clear filters",
@@ -99,14 +93,22 @@ export const siteContent = {
       rate: "Rate (USD)",
     },
     status: {
-      preview: "Showing {count} bundled preview rows.",
-      loading: "Loading the full product catalog…",
-      loaded: "Full catalog loaded: {count} products.",
-      error: "Full catalog unavailable. Showing the {count}-row preview.",
+      unconfigured: "Catalog URL not configured. No records are available.",
+      loading: "Loading the product catalog…",
+      loaded: "Catalog loaded: {count} products.",
+      error: "Catalog unavailable. No records are displayed.",
     },
     emptyTitle: "No matches",
     emptyDescription:
-      "Try another ingredient, product name, manufacturer or pack size, or open the full catalog PDF.",
+      "Try another ingredient, product name, manufacturer or pack size.",
+    noCatalogRecordsTitle: "No catalog records available",
+    noCatalogConfiguredDescription:
+      "Set NEXT_PUBLIC_CATALOG_DATA_URL to the versioned catalog file to load product records.",
+    noCatalogRecordsDescription:
+      "The catalog files loaded, but they contain no product records.",
+    noCatalogUnavailableDescription:
+      "The catalog, manufacturer, or packaging file could not be fetched or decoded. Check the file URLs, CORS policy and XOR key.",
+    removeFilterAriaLabel: "Remove {label} from the {mode} filters",
     noProducts: "No products to display",
     summaryShowing: "Showing",
     summaryOf: "of",
@@ -115,7 +117,7 @@ export const siteContent = {
     previousPageAriaLabel: "Previous page",
     nextPageAriaLabel: "Next page",
     sourceNote:
-      "Product data is searchable locally in your browser. The bundled list is a preview until the full normalized catalog is available at the configured catalog URL.",
+      "Product data and its manufacturer and packaging dictionaries are loaded from version-matched files in the configured catalog data folder.",
   },
   faq: {
     eyebrow: "Good to know",

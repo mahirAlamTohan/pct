@@ -133,7 +133,7 @@ function normalizeProduct(
   const content = asText(findField(record, FIELD_ALIASES.content))
   const product = asText(findField(record, FIELD_ALIASES.product))
 
-  if (!content || !product) return null
+  if (!product) return null
 
   const rawRate = asText(findField(record, FIELD_ALIASES.rate))
   const rate = rawRate.replace(/^\$\s*/, "")
@@ -205,6 +205,44 @@ function normalizePriceMetadata(value: unknown) {
   }
 
   return { minPrice, maxPrice }
+}
+
+function readDictionaryArtifact(
+  value: unknown,
+  expectedKind: "manufacturers" | "packaging"
+) {
+  const artifact = asRecord(value)
+
+  if (artifact?.kind !== expectedKind || !Array.isArray(artifact.values)) {
+    throw new Error(`The ${expectedKind} catalog dictionary file is invalid.`)
+  }
+
+  const values = artifact.values.map(asText)
+  if (values.some((entry) => !entry)) {
+    throw new Error(
+      `The ${expectedKind} catalog dictionary contains empty values.`
+    )
+  }
+
+  return values
+}
+
+export function normalizeCatalogFiles(
+  catalogValue: unknown,
+  manufacturersValue: unknown,
+  packagingValue: unknown
+): CatalogDataset {
+  const catalog = asRecord(catalogValue)
+
+  if (!catalog || !Array.isArray(catalog.products)) {
+    throw new Error("The catalog data file does not contain a products array.")
+  }
+
+  return normalizeCatalogData({
+    ...catalog,
+    manufacturers: readDictionaryArtifact(manufacturersValue, "manufacturers"),
+    packaging: readDictionaryArtifact(packagingValue, "packaging"),
+  })
 }
 
 function normalizeLegacyRows(rows: unknown[]): CatalogDataset {

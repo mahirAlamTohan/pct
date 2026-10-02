@@ -17,7 +17,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 5
+      "actualWorkers": 2
     },
     "preserveOutput": "always",
     "projects": [
@@ -26,7 +26,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 5
+          "actualWorkers": 2
         },
         "id": "chromium",
         "name": "chromium",
@@ -66,7 +66,7 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.63.0",
-    "workers": 6,
+    "workers": 2,
     "webServer": {
       "command": "node scripts/serve-static.mjs --directory out --host 127.0.0.1 --port 4173",
       "url": "http://127.0.0.1:4173",
@@ -85,12 +85,12 @@
         {
           "title": "static catalog experience",
           "file": "catalog.spec.ts",
-          "line": 85,
+          "line": 21,
           "column": 6,
           "specs": [
             {
-              "title": "searches manufacturer typos and combines removable include/exclude facets",
-              "ok": false,
+              "title": "loads the catalog, exposes only the required columns, and links to the configured PDF",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
@@ -103,73 +103,28 @@
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 1803,
-                      "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark')\nExpected substring: \u001b[32m\"BETA\"\u001b[39m\nError: strict mode violation: getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark') resolved to 3 elements:\n    1) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">BETA</mark> aka getByText('BETA', { exact: true })\n    2) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">Beta</mark> aka getByText('Beta', { exact: true })\n    3) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">Pharmaceuticals</mark> aka getByText('Pharmaceuticals')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark') with timeout 7500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark')\u001b[22m\n",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark')\nExpected substring: \u001b[32m\"BETA\"\u001b[39m\nError: strict mode violation: getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark') resolved to 3 elements:\n    1) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">BETA</mark> aka getByText('BETA', { exact: true })\n    2) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">Beta</mark> aka getByText('Beta', { exact: true })\n    3) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">Pharmaceuticals</mark> aka getByText('Pharmaceuticals')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark') with timeout 7500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark')\u001b[22m\n\n    at F:\\pct\\e2e\\catalog.spec.ts:109:43",
-                        "location": {
-                          "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                          "column": 43,
-                          "line": 109
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 107 |\u001b[39m     \u001b[36mawait\u001b[39m expect(betaRow)\u001b[33m.\u001b[39mtoBeVisible()\n \u001b[90m 108 |\u001b[39m     \u001b[36mawait\u001b[39m expect(betaRow)\u001b[33m.\u001b[39mtoContainText(\u001b[32m\"Beta Pharmaceuticals Ltd\"\u001b[39m)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 109 |\u001b[39m     \u001b[36mawait\u001b[39m expect(betaRow\u001b[33m.\u001b[39mlocator(\u001b[32m\"mark\"\u001b[39m))\u001b[33m.\u001b[39mtoContainText(\u001b[32m\"BETA\"\u001b[39m)\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 110 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\n \u001b[90m 111 |\u001b[39m       page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"row\"\u001b[39m)\u001b[33m.\u001b[39mfilter({ hasText\u001b[33m:\u001b[39m \u001b[32m\"ALPHA 10MG\"\u001b[39m })\n \u001b[90m 112 |\u001b[39m     )\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m)\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                            "column": 43,
-                            "line": 109
-                          },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark')\nExpected substring: \u001b[32m\"BETA\"\u001b[39m\nError: strict mode violation: getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark') resolved to 3 elements:\n    1) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">BETA</mark> aka getByText('BETA', { exact: true })\n    2) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">Beta</mark> aka getByText('Beta', { exact: true })\n    3) <mark class=\"rounded-[3px] bg-amber-200 px-0.5 font-extrabold text-amber-950 dark:bg-amber-700/70 dark:text-amber-50\">Pharmaceuticals</mark> aka getByText('Pharmaceuticals')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark') with timeout 7500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('row').filter({ hasText: 'BETA 20MG' }).locator('mark')\u001b[22m\n\n\n\u001b[0m \u001b[90m 107 |\u001b[39m     \u001b[36mawait\u001b[39m expect(betaRow)\u001b[33m.\u001b[39mtoBeVisible()\n \u001b[90m 108 |\u001b[39m     \u001b[36mawait\u001b[39m expect(betaRow)\u001b[33m.\u001b[39mtoContainText(\u001b[32m\"Beta Pharmaceuticals Ltd\"\u001b[39m)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 109 |\u001b[39m     \u001b[36mawait\u001b[39m expect(betaRow\u001b[33m.\u001b[39mlocator(\u001b[32m\"mark\"\u001b[39m))\u001b[33m.\u001b[39mtoContainText(\u001b[32m\"BETA\"\u001b[39m)\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 110 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\n \u001b[90m 111 |\u001b[39m       page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"row\"\u001b[39m)\u001b[33m.\u001b[39mfilter({ hasText\u001b[33m:\u001b[39m \u001b[32m\"ALPHA 10MG\"\u001b[39m })\n \u001b[90m 112 |\u001b[39m     )\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m0\u001b[39m)\u001b[0m\n\u001b[2m    at F:\\pct\\e2e\\catalog.spec.ts:109:43\u001b[22m"
-                        }
-                      ],
+                      "status": "passed",
+                      "duration": 866,
+                      "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T19:23:28.527Z",
+                      "startTime": "2026-10-02T21:37:44.635Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-04254-able-include-exclude-facets-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-04254-able-include-exclude-facets-chromium\\video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-04254-able-include-exclude-facets-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-04254-able-include-exclude-facets-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                        "column": 43,
-                        "line": 109
-                      }
+                      "attachments": []
                     }
                   ],
-                  "status": "unexpected"
+                  "status": "expected"
                 }
               ],
-              "id": "30aa42b97d8966d0c2dc-764be5473c1ff85c9173",
+              "id": "30aa42b97d8966d0c2dc-e02ebb7dfdb77206aec1",
               "file": "catalog.spec.ts",
-              "line": 86,
+              "line": 22,
               "column": 3
             },
             {
-              "title": "keeps the mobile header fixed and preserves filter/footer themes",
-              "ok": false,
+              "title": "keeps catalog rows out of HTML and omits cookies from artifact requests",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
@@ -182,72 +137,27 @@
                     {
                       "workerIndex": 1,
                       "parallelIndex": 1,
-                      "status": "failed",
-                      "duration": 1785,
-                      "error": {
-                        "message": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Filters' }) resolved to 2 elements:\n    1) <button tabindex=\"0\" type=\"button\" data-slot=\"button\" aria-expanded=\"false\" aria-controls=\"catalog-filters\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-eve…>…</button> aka getByRole('button', { name: 'Filters', exact: true })\n    2) <button disabled tabindex=\"0\" type=\"button\" data-disabled=\"\" data-slot=\"button\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50…>…</button> aka getByRole('button', { name: 'Clear filters' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Filters' })\u001b[22m\n",
-                        "stack": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Filters' }) resolved to 2 elements:\n    1) <button tabindex=\"0\" type=\"button\" data-slot=\"button\" aria-expanded=\"false\" aria-controls=\"catalog-filters\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-eve…>…</button> aka getByRole('button', { name: 'Filters', exact: true })\n    2) <button disabled tabindex=\"0\" type=\"button\" data-disabled=\"\" data-slot=\"button\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50…>…</button> aka getByRole('button', { name: 'Clear filters' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Filters' })\u001b[22m\n\n    at F:\\pct\\e2e\\catalog.spec.ts:211:57",
-                        "location": {
-                          "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                          "column": 57,
-                          "line": 211
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 209 |\u001b[39m\n \u001b[90m 210 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#catalog\"\u001b[39m)\u001b[33m.\u001b[39mscrollIntoViewIfNeeded()\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m\"Filters\"\u001b[39m })\u001b[33m.\u001b[39mclick()\n \u001b[90m     |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m     \u001b[36mconst\u001b[39m betaManufacturer \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m 213 |\u001b[39m       name\u001b[33m:\u001b[39m \u001b[35m/Manufacturer: Beta Pharmaceuticals Ltd/\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 214 |\u001b[39m     })\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                            "column": 57,
-                            "line": 211
-                          },
-                          "message": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Filters' }) resolved to 2 elements:\n    1) <button tabindex=\"0\" type=\"button\" data-slot=\"button\" aria-expanded=\"false\" aria-controls=\"catalog-filters\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-eve…>…</button> aka getByRole('button', { name: 'Filters', exact: true })\n    2) <button disabled tabindex=\"0\" type=\"button\" data-disabled=\"\" data-slot=\"button\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50…>…</button> aka getByRole('button', { name: 'Clear filters' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Filters' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 209 |\u001b[39m\n \u001b[90m 210 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m\"#catalog\"\u001b[39m)\u001b[33m.\u001b[39mscrollIntoViewIfNeeded()\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m\"Filters\"\u001b[39m })\u001b[33m.\u001b[39mclick()\n \u001b[90m     |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m     \u001b[36mconst\u001b[39m betaManufacturer \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m 213 |\u001b[39m       name\u001b[33m:\u001b[39m \u001b[35m/Manufacturer: Beta Pharmaceuticals Ltd/\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 214 |\u001b[39m     })\u001b[0m\n\u001b[2m    at F:\\pct\\e2e\\catalog.spec.ts:211:57\u001b[22m"
-                        }
-                      ],
+                      "status": "passed",
+                      "duration": 826,
+                      "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T19:23:28.553Z",
+                      "startTime": "2026-10-02T21:37:44.635Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ae4bb-serves-filter-footer-themes-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ae4bb-serves-filter-footer-themes-chromium\\video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ae4bb-serves-filter-footer-themes-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ae4bb-serves-filter-footer-themes-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                        "column": 57,
-                        "line": 211
-                      }
+                      "attachments": []
                     }
                   ],
-                  "status": "unexpected"
+                  "status": "expected"
                 }
               ],
-              "id": "30aa42b97d8966d0c2dc-691ed0d0fea813c24234",
+              "id": "30aa42b97d8966d0c2dc-d28b8f7450f90ae24a46",
               "file": "catalog.spec.ts",
-              "line": 172,
+              "line": 42,
               "column": 3
             },
             {
-              "title": "shows a clear error and no product rows when the catalog endpoint fails",
+              "title": "announces the loading state before the catalog and dictionaries arrive",
               "ok": true,
               "tags": [],
               "tests": [
@@ -259,15 +169,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1567,
+                      "duration": 2539,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T19:23:28.553Z",
+                      "startTime": "2026-10-02T21:37:45.570Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -275,14 +185,14 @@
                   "status": "expected"
                 }
               ],
-              "id": "30aa42b97d8966d0c2dc-a5d0579d98e144dcfb5b",
+              "id": "30aa42b97d8966d0c2dc-6eba9ef2d7e600e85d4c",
               "file": "catalog.spec.ts",
-              "line": 253,
+              "line": 84,
               "column": 3
             },
             {
-              "title": "has no axe-detected WCAG 2.2 A/AA violations with filters open",
-              "ok": false,
+              "title": "searches every catalog field, tolerates manufacturer typos, and highlights matches",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
@@ -293,70 +203,535 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 3,
-                      "parallelIndex": 3,
-                      "status": "failed",
-                      "duration": 1697,
-                      "error": {
-                        "message": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Filters' }) resolved to 2 elements:\n    1) <button tabindex=\"0\" type=\"button\" data-slot=\"button\" aria-expanded=\"false\" aria-controls=\"catalog-filters\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-eve…>…</button> aka getByRole('button', { name: 'Filters', exact: true })\n    2) <button disabled tabindex=\"0\" type=\"button\" data-disabled=\"\" data-slot=\"button\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50…>…</button> aka getByRole('button', { name: 'Clear filters' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Filters' })\u001b[22m\n",
-                        "stack": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Filters' }) resolved to 2 elements:\n    1) <button tabindex=\"0\" type=\"button\" data-slot=\"button\" aria-expanded=\"false\" aria-controls=\"catalog-filters\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-eve…>…</button> aka getByRole('button', { name: 'Filters', exact: true })\n    2) <button disabled tabindex=\"0\" type=\"button\" data-disabled=\"\" data-slot=\"button\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50…>…</button> aka getByRole('button', { name: 'Clear filters' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Filters' })\u001b[22m\n\n    at F:\\pct\\e2e\\catalog.spec.ts:274:57",
-                        "location": {
-                          "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                          "column": 57,
-                          "line": 274
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 272 |\u001b[39m     \u001b[36mawait\u001b[39m installCatalogFixtures(page)\n \u001b[90m 273 |\u001b[39m     \u001b[36mawait\u001b[39m openCatalog(page)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 274 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m\"Filters\"\u001b[39m })\u001b[33m.\u001b[39mclick()\n \u001b[90m     |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 275 |\u001b[39m\n \u001b[90m 276 |\u001b[39m     \u001b[36mconst\u001b[39m results \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mAxeBuilder\u001b[39m({ page })\n \u001b[90m 277 |\u001b[39m       \u001b[33m.\u001b[39mwithTags([\u001b[32m\"wcag2a\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag2aa\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag21a\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag21aa\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag22aa\"\u001b[39m])\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                            "column": 57,
-                            "line": 274
-                          },
-                          "message": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Filters' }) resolved to 2 elements:\n    1) <button tabindex=\"0\" type=\"button\" data-slot=\"button\" aria-expanded=\"false\" aria-controls=\"catalog-filters\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-eve…>…</button> aka getByRole('button', { name: 'Filters', exact: true })\n    2) <button disabled tabindex=\"0\" type=\"button\" data-disabled=\"\" data-slot=\"button\" class=\"motion-safe:active:scale-0.98 inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50…>…</button> aka getByRole('button', { name: 'Clear filters' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Filters' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 272 |\u001b[39m     \u001b[36mawait\u001b[39m installCatalogFixtures(page)\n \u001b[90m 273 |\u001b[39m     \u001b[36mawait\u001b[39m openCatalog(page)\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 274 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m\"button\"\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m\"Filters\"\u001b[39m })\u001b[33m.\u001b[39mclick()\n \u001b[90m     |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 275 |\u001b[39m\n \u001b[90m 276 |\u001b[39m     \u001b[36mconst\u001b[39m results \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mAxeBuilder\u001b[39m({ page })\n \u001b[90m 277 |\u001b[39m       \u001b[33m.\u001b[39mwithTags([\u001b[32m\"wcag2a\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag2aa\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag21a\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag21aa\"\u001b[39m\u001b[33m,\u001b[39m \u001b[32m\"wcag22aa\"\u001b[39m])\u001b[0m\n\u001b[2m    at F:\\pct\\e2e\\catalog.spec.ts:274:57\u001b[22m"
-                        }
-                      ],
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 881,
+                      "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-02T19:23:28.529Z",
+                      "startTime": "2026-10-02T21:37:45.610Z",
                       "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ca387-iolations-with-filters-open-chromium\\test-failed-1.png"
-                        },
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ca387-iolations-with-filters-open-chromium\\video.webm"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ca387-iolations-with-filters-open-chromium\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "F:\\pct\\test-results\\catalog-static-catalog-exp-ca387-iolations-with-filters-open-chromium\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "F:\\pct\\e2e\\catalog.spec.ts",
-                        "column": 57,
-                        "line": 274
-                      }
+                      "attachments": []
                     }
                   ],
-                  "status": "unexpected"
+                  "status": "expected"
                 }
               ],
-              "id": "30aa42b97d8966d0c2dc-e9c43df72ccd747df74c",
+              "id": "30aa42b97d8966d0c2dc-170af2449b8b53ab1ead",
               "file": "catalog.spec.ts",
-              "line": 269,
+              "line": 98,
+              "column": 3
+            },
+            {
+              "title": "shows a useful no-match state and restores results when search is cleared",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 748,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:46.507Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-1a80b1ab7a35e76ab802",
+              "file": "catalog.spec.ts",
+              "line": 137,
+              "column": 3
+            },
+            {
+              "title": "paginates, disables boundary controls, and resets to page one after search",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 927,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:47.265Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-38b0b597219d21faa31f",
+              "file": "catalog.spec.ts",
+              "line": 158,
+              "column": 3
+            },
+            {
+              "title": "searches the two facet lists independently and cycles Manufacturer include/exclude/remove",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1726,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:48.121Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-4db2d292bb3b1dd3ccc4",
+              "file": "catalog.spec.ts",
+              "line": 195,
+              "column": 3
+            },
+            {
+              "title": "combines independent Manufacturer and Packaging states and removes either summary",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2053,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:48.205Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-5c648fcd90d7d0f59707",
+              "file": "catalog.spec.ts",
+              "line": 261,
+              "column": 3
+            },
+            {
+              "title": "cycles Manufacturer filters by keyboard and preserves state when filters close",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1979,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:49.858Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-3421366b2812bc5c4688",
+              "file": "catalog.spec.ts",
+              "line": 325,
+              "column": 3
+            },
+            {
+              "title": "virtualizes large Manufacturer facets while making distant values searchable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1186,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:50.270Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-242e5b79be2d5fff9633",
+              "file": "catalog.spec.ts",
+              "line": 399,
+              "column": 3
+            },
+            {
+              "title": "filters by the accessible USD range slider using keyboard controls",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1154,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:51.467Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-a8ced7bc61ff51eb6be0",
+              "file": "catalog.spec.ts",
+              "line": 438,
+              "column": 3
+            },
+            {
+              "title": "Clear filters resets facets and price bounds while preserving the search query",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2254,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:51.853Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-76c645172d0b7dbd57c8",
+              "file": "catalog.spec.ts",
+              "line": 473,
+              "column": 3
+            },
+            {
+              "title": "shows no records when valid catalog files contain an empty products array",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 741,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:52.631Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-c7cfaf6ce9f84e9b4818",
+              "file": "catalog.spec.ts",
+              "line": 519,
+              "column": 3
+            },
+            {
+              "title": "shows a clear load error and no rows when the catalog endpoint fails",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 691,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:53.382Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-91f399eb99b41e266546",
+              "file": "catalog.spec.ts",
+              "line": 551,
+              "column": 3
+            },
+            {
+              "title": "rejects malformed dictionary data without showing preview or stale records",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 688,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:54.082Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-91df4d46fa7ab7f9035b",
+              "file": "catalog.spec.ts",
+              "line": 565,
+              "column": 3
+            },
+            {
+              "title": "reports invalid JSON instead of rendering invented products",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 684,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:54.118Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-27d10189a46fedc97bac",
+              "file": "catalog.spec.ts",
+              "line": 586,
+              "column": 3
+            },
+            {
+              "title": "keeps all catalog columns reachable inside the mobile table scroller",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 651,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:54.780Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-5a37292424c54fcca858",
+              "file": "catalog.spec.ts",
+              "line": 604,
+              "column": 3
+            },
+            {
+              "title": "has no axe-detected WCAG 2.2 A/AA violations with filters open in either theme",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2988,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:54.812Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-fbbf2334871b8dce82cd",
+              "file": "catalog.spec.ts",
+              "line": 638,
+              "column": 3
+            },
+            {
+              "title": "keeps the mobile header fixed and filter/footer colors usable in light and dark mode",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1341,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-02T21:37:55.441Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "30aa42b97d8966d0c2dc-a106a8ac5bd286ab0950",
+              "file": "catalog.spec.ts",
+              "line": 665,
               "column": 3
             }
           ]
@@ -370,7 +745,7 @@
       "line": 0,
       "specs": [
         {
-          "title": "reopens the saved app shell without a network connection",
+          "title": "pre-caches the app shell and reopens it with a clear offline notice",
           "ok": true,
           "tags": [],
           "tests": [
@@ -382,15 +757,15 @@
               "projectName": "chromium",
               "results": [
                 {
-                  "workerIndex": 4,
-                  "parallelIndex": 4,
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1992,
+                  "duration": 1105,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-02T19:23:28.493Z",
+                  "startTime": "2026-10-02T21:37:56.802Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -398,9 +773,561 @@
               "status": "expected"
             }
           ],
-          "id": "586fc5283fd8ec7c7982-b494f664d96e5f946728",
+          "id": "586fc5283fd8ec7c7982-23ce2bb2ea64bad64dd2",
           "file": "offline.spec.ts",
-          "line": 5,
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "caches successful catalog responses on-device and reloads them offline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1090,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:37:57.822Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-1a9f2a8d7e09ac4a1b41",
+          "file": "offline.spec.ts",
+          "line": 59,
+          "column": 1
+        },
+        {
+          "title": "shows and clears the offline notice as connectivity changes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 713,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:37:57.917Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-47cd0a6f0e3f63aed2a1",
+          "file": "offline.spec.ts",
+          "line": 113,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "site.spec.ts",
+      "file": "site.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "renders the SEO, sharing, viewport, and accessible hero metadata",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 780,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:37:58.649Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-2d574f2813100993e973",
+          "file": "site.spec.ts",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "serves the static site with restrictive browser security headers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 590,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:37:58.935Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-3996424e7459b7f5d8d9",
+          "file": "site.spec.ts",
+          "line": 82,
+          "column": 1
+        },
+        {
+          "title": "keeps page requests same-origin without loading third-party resources",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 704,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:37:59.440Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-060ea49f6a7882819c4b",
+          "file": "site.spec.ts",
+          "line": 110,
+          "column": 1
+        },
+        {
+          "title": "navigates to each section with desktop and mobile menus",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 2506,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:37:59.535Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-5918524ab2a898fe384d",
+          "file": "site.spec.ts",
+          "line": 136,
+          "column": 1
+        },
+        {
+          "title": "switches navigation at phone, tablet, and desktop breakpoints without page overflow",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1019,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:00.154Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-06cdff3b8a142409069a",
+          "file": "site.spec.ts",
+          "line": 172,
+          "column": 1
+        },
+        {
+          "title": "keeps the header fixed and animates it into its floating state on scroll",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 699,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:01.184Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-af2f74c1cba8887e91c8",
+          "file": "site.spec.ts",
+          "line": 203,
+          "column": 1
+        },
+        {
+          "title": "follows system theme until the user selects a theme, then persists it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1035,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:01.892Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-6f8d21eea6f16d573838",
+          "file": "site.spec.ts",
+          "line": 237,
+          "column": 1
+        },
+        {
+          "title": "renders the configured About story and service regions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 697,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:02.050Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-f014e475560eb60a6258",
+          "file": "site.spec.ts",
+          "line": 262,
+          "column": 1
+        },
+        {
+          "title": "provides working payment and shipping FAQ accordion controls",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 757,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:02.757Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-654444e976a690a69071",
+          "file": "site.spec.ts",
+          "line": 285,
+          "column": 1
+        },
+        {
+          "title": "passes mobile WCAG 2.2 A/AA audits with contact actions expanded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2369,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:02.935Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-fb491d23c8b2f7585d75",
+          "file": "site.spec.ts",
+          "line": 315,
+          "column": 1
+        },
+        {
+          "title": "renders every configured FAQ answer and supports keyboard toggling",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1350,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:03.522Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-e7a5883ad40ea84eefa4",
+          "file": "site.spec.ts",
+          "line": 339,
+          "column": 1
+        },
+        {
+          "title": "opens, dismisses, and exposes configured floating contact actions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 866,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:04.881Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-d4ac991aafb4ba10f8aa",
+          "file": "site.spec.ts",
+          "line": 370,
+          "column": 1
+        },
+        {
+          "title": "uses configured call, email, WhatsApp, and support-hours destinations",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 735,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:05.314Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-34930bb77d3b6041fde4",
+          "file": "site.spec.ts",
+          "line": 411,
+          "column": 1
+        },
+        {
+          "title": "renders the PWA manifest, icons, catalog shortcut, and rich footer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 764,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-02T21:38:05.756Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-2a4d4f1a8d5f29e741ec",
+          "file": "site.spec.ts",
+          "line": 470,
           "column": 1
         }
       ]
@@ -408,11 +1335,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-02T19:23:27.846Z",
-    "duration": 3043.249,
-    "expected": 2,
+    "startTime": "2026-10-02T21:37:43.854Z",
+    "duration": 22946.056,
+    "expected": 36,
     "skipped": 0,
-    "unexpected": 3,
+    "unexpected": 0,
     "flaky": 0
   }
 }

@@ -1,50 +1,50 @@
 {
-  "status": "failed",
-  "startedAt": "2026-10-02T19:22:58.949Z",
-  "finishedAt": "2026-10-02T19:23:30.989Z",
-  "durationMs": 32040,
+  "status": "passed",
+  "startedAt": "2026-10-02T21:37:20.614Z",
+  "finishedAt": "2026-10-02T21:38:06.885Z",
+  "durationMs": 46271,
   "steps": [
     {
       "name": "Generate Next.js route types",
-      "command": "npm exec -- next typegen",
+      "command": "bun x next typegen",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 850
+      "durationMs": 384
     },
     {
       "name": "Production static build",
-      "command": "npm run build",
+      "command": "bun run build",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 9719
+      "durationMs": 6737
     },
     {
       "name": "ESLint",
-      "command": "npm run lint",
+      "command": "bun run lint",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 2748
+      "durationMs": 1713
     },
     {
       "name": "TypeScript",
-      "command": "npm run typecheck",
+      "command": "bun run typecheck",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 3116
+      "durationMs": 2935
     },
     {
       "name": "Unit and component tests",
-      "command": "npm test -- --reporter=dot",
+      "command": "bun x vitest run --reporter=dot",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 5120
+      "durationMs": 5021
     },
     {
       "name": "Chromium end-to-end tests",
-      "command": "npm run test:e2e",
-      "status": "failed",
-      "exitCode": 1,
-      "durationMs": 10482
+      "command": "bun run test:e2e",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 29477
     }
   ],
   "reports": {

@@ -21,8 +21,12 @@ export default defineConfig([
   globalIgnores([
     ".next",
     "out",
+    "coverage",
+    "playwright-report",
+    "test-results",
     "node_modules",
     "scripts/**/*.mjs",
+    "scripts/**/*.k6.js",
     "eslint.config.mjs",
   ]),
 

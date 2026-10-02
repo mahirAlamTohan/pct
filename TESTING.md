@@ -69,9 +69,9 @@ npm run test:load
 
 The guard is a safety rail, not authorization: agree on the staging target, workload, duration, monitoring, and test window before a remote run. This bounded Autocannon smoke test is **not** a 10,000-concurrent-user test and cannot establish production capacity; that requires an approved, representative distributed workload and confirmation of the hosting/CDN limits.
 
-## Authorized 10,000-VU k6 profile
+## Separately authorized 10,000-VU k6 profile
 
-`scripts/load-test.k6.js` is a separate, explicitly gated k6 test for the approved production target. It is not the bounded Autocannon test above. Install k6 on the load-generator PC, confirm the production test window and monitoring are active, then run:
+`scripts/load-test.k6.js` is a separate, explicitly gated k6 test for the production target. It is not the bounded Autocannon test above. The command below is documentation, not authorization: do not use it for the current deployment unless the owner confirms deployment and explicitly approves the target, workload, monitoring, and test window. The earlier authorization applied only to its earlier run. No k6 production run was performed for this E2E update.
 
 ```sh
 k6 run -e BASE_URL=https://pct.mahiralamtohan.workers.dev/ -e K6_CONFIRM_PRODUCTION_TEST=I_AUTHORIZE_THE_PCT_10K_PRODUCTION_TEST scripts/load-test.k6.js

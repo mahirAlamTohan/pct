@@ -32,8 +32,9 @@ export function HeroSection() {
           alt=""
           aria-hidden="true"
           className="dark:saturate-0.82 object-cover object-[68%_center] md:object-[center_52%] dark:brightness-[0.64]"
+          fetchPriority="high"
           fill
-          priority
+          preload
           sizes="100vw"
           src={heroImage}
         />

@@ -16,7 +16,8 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react"
-import MiniSearch, { type SearchResult } from "minisearch"
+import type MiniSearch from "minisearch"
+import type { SearchResult } from "minisearch"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
 
@@ -479,6 +480,11 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
   const deferredQuery = useDeferredValue(query)
   const [page, setPage] = useState(1)
   const [products, setProducts] = useState<CatalogProduct[]>([])
+  const [searchIndex, setSearchIndex] =
+    useState<MiniSearch<CatalogSearchDocument> | null>(null)
+  const [isSearchIndexing, setIsSearchIndexing] = useState(false)
+  const [searchIndexError, setSearchIndexError] = useState("")
+  const indexedProductsRef = useRef<CatalogProduct[] | null>(null)
   const [manufacturerOptions, setManufacturerOptions] = useState<string[]>([])
   const [packagingOptions, setPackagingOptions] = useState<string[]>([])
   const [loadState, setLoadState] = useState<CatalogLoadState>(
@@ -510,6 +516,12 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
 
     fetchCatalogData(catalogDataUrl, controller.signal)
       .then((dataset) => {
+        if (controller.signal.aborted) return
+
+        indexedProductsRef.current = null
+        setSearchIndex(null)
+        setSearchIndexError("")
+        setIsSearchIndexing(false)
         setProducts(dataset.products)
         setManufacturerOptions(
           dataset.manufacturers.length > 0
@@ -527,6 +539,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
         setPriceBounds(nextPriceBounds)
         setPriceRange(nextPriceBounds)
         setPage(1)
+
         setLoadState("loaded")
       })
       .catch((error: unknown) => {
@@ -545,33 +558,58 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
     }
   }, [catalogDataUrl])
 
+  useEffect(() => {
+    if (!deferredQuery.trim() || products.length === 0 || searchIndex) return
+    if (indexedProductsRef.current === products) return
+
+    indexedProductsRef.current = products
+    setIsSearchIndexing(true)
+    setSearchIndexError("")
+
+    void (async () => {
+      try {
+        const { default: MiniSearchConstructor } = await import("minisearch")
+        const index = new MiniSearchConstructor<CatalogSearchDocument>({
+          fields: SEARCH_FIELDS,
+          idField: "id",
+          processTerm: (term) => normalize(term),
+          searchOptions: {
+            boost: { product: 3, content: 2, manufacturer: 1.5 },
+            combineWith: "AND",
+            fuzzy: 0.2,
+            prefix: true,
+          },
+        })
+
+        await index.addAllAsync(
+          products.map((product, index) => ({
+            ...product,
+            id: index + 1,
+          })),
+          { chunkSize: 200 }
+        )
+
+        if (indexedProductsRef.current !== products) return
+        setSearchIndex(index)
+      } catch (error) {
+        if (indexedProductsRef.current !== products) return
+        setSearchIndexError(
+          error instanceof Error
+            ? error.message
+            : "Search could not be prepared."
+        )
+      } finally {
+        if (indexedProductsRef.current === products) {
+          setIsSearchIndexing(false)
+        }
+      }
+    })()
+  }, [deferredQuery, products, searchIndex])
+
   const productPrices = useMemo(
     () => products.map(({ rate }) => numericValue(rate)),
     [products]
   )
-
-  const searchIndex = useMemo(() => {
-    const index = new MiniSearch<CatalogSearchDocument>({
-      fields: SEARCH_FIELDS,
-      idField: "id",
-      processTerm: (term) => normalize(term),
-      searchOptions: {
-        boost: { product: 3, content: 2, manufacturer: 1.5 },
-        combineWith: "AND",
-        fuzzy: 0.2,
-        prefix: true,
-      },
-    })
-
-    index.addAll(
-      products.map((product, index) => ({
-        ...product,
-        id: index + 1,
-      }))
-    )
-
-    return index
-  }, [products])
 
   const searchEntries = useMemo<CatalogEntry[]>(() => {
     const searchTerm = deferredQuery.trim()
@@ -584,6 +622,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
         matches: {},
       }))
     }
+    if (!searchIndex) return []
 
     return searchIndex
       .search(searchTerm, {
@@ -800,28 +839,36 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
   const includedSummary = summaryItemsFor("include")
   const excludedSummary = summaryItemsFor("exclude")
 
-  const statusMessage = (() => {
-    switch (loadState) {
-      case "unconfigured":
-        return copy.status.unconfigured
-      case "loading":
-        return copy.status.loading
-      case "loaded":
-        return formatMessage(copy.status.loaded, {
-          count: products.length.toLocaleString(),
-        })
-      case "error":
-        return copy.status.error
-    }
-  })()
-  const emptyStateTitle =
-    loadState === "loading"
-      ? copy.status.loading
-      : loadState === "loaded" && products.length > 0
-        ? copy.emptyTitle
-        : copy.noCatalogRecordsTitle
-  const emptyStateDescription =
-    loadState === "loading"
+  const statusMessage = searchIndexError
+    ? copy.status.searchError
+    : isSearchIndexing
+      ? copy.status.indexing
+      : (() => {
+          switch (loadState) {
+            case "unconfigured":
+              return copy.status.unconfigured
+            case "loading":
+              return copy.status.loading
+            case "loaded":
+              return formatMessage(copy.status.loaded, {
+                count: products.length.toLocaleString(),
+              })
+            case "error":
+              return copy.status.error
+          }
+        })()
+  const emptyStateTitle = searchIndexError
+    ? copy.status.searchError
+    : isSearchIndexing
+      ? copy.status.indexing
+      : loadState === "loading"
+        ? copy.status.loading
+        : loadState === "loaded" && products.length > 0
+          ? copy.emptyTitle
+          : copy.noCatalogRecordsTitle
+  const emptyStateDescription = searchIndexError
+    ? searchIndexError
+    : isSearchIndexing || loadState === "loading"
       ? ""
       : loadState === "unconfigured"
         ? copy.noCatalogConfiguredDescription
@@ -1122,18 +1169,22 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
               className={cn(
                 "inline-flex items-center gap-2 font-semibold",
                 loadState === "loaded" &&
+                  !searchIndexError &&
+                  !isSearchIndexing &&
                   "text-emerald-800 dark:text-emerald-300",
-                loadState === "loading" && "text-blue-700 dark:text-blue-300",
-                loadState === "error" && "text-rose-700 dark:text-rose-300",
+                (loadState === "loading" || isSearchIndexing) &&
+                  "text-blue-700 dark:text-blue-300",
+                (loadState === "error" || searchIndexError) &&
+                  "text-rose-700 dark:text-rose-300",
                 loadState === "unconfigured" && "text-muted-foreground"
               )}
             >
-              {loadState === "loading" ? (
+              {loadState === "loading" || isSearchIndexing ? (
                 <LoaderCircle
                   aria-hidden="true"
                   className="size-3.5 animate-spin"
                 />
-              ) : loadState === "loaded" ? (
+              ) : loadState === "loaded" && !searchIndexError ? (
                 <span className="size-1.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/15" />
               ) : (
                 <AlertCircle aria-hidden="true" className="size-3.5" />
@@ -1265,7 +1316,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
               role="status"
             >
               <span className="mb-3 grid size-14 place-items-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
-                {loadState === "loading" ? (
+                {loadState === "loading" || isSearchIndexing ? (
                   <LoaderCircle
                     aria-hidden="true"
                     className="size-6 animate-spin"

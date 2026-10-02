@@ -91,6 +91,8 @@ export interface SiteContent {
       loading: string
       loaded: string
       error: string
+      indexing: string
+      searchError: string
     }
     emptyTitle: string
     emptyDescription: string

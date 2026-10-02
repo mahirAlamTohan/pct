@@ -153,9 +153,12 @@ describe("CatalogExplorer", () => {
       screen.getByRole("searchbox", { name: "Search the medicine catalog" }),
       "Cobalt"
     )
-    await waitFor(() => {
-      expect(screen.getAllByRole("row")).toHaveLength(9)
-    })
+    await waitFor(
+      () => {
+        expect(screen.getAllByRole("row")).toHaveLength(9)
+      },
+      { timeout: 5_000 }
+    )
 
     await user.click(screen.getByRole("button", { name: "Filters" }))
     await user.type(

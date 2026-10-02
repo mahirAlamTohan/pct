@@ -49,7 +49,7 @@ export const siteContent = {
       "Fuzzy search checks active ingredient, product, pack size, rate and manufacturer.",
     facetSearchAriaLabel: "Search {label} filters",
     fullCatalogLabel: "full catalog",
-    searchNowLabel: "searchable now",
+    searchNowLabel: "loading catalog",
     loadErrorAdvice:
       "Check the catalog URL, XOR key, CORS headers and file format.",
     paginationLabel: "Catalog pagination",
@@ -96,6 +96,8 @@ export const siteContent = {
       loading: "Loading the product catalog…",
       loaded: "Catalog loaded: {count} products.",
       error: "Catalog unavailable. No records are displayed.",
+      indexing: "Preparing search…",
+      searchError: "Search is unavailable. Try again later.",
     },
     emptyTitle: "No matches",
     emptyDescription:
@@ -115,8 +117,7 @@ export const siteContent = {
     nextPage: "Next",
     previousPageAriaLabel: "Previous page",
     nextPageAriaLabel: "Next page",
-    sourceNote:
-      "",
+    sourceNote: "",
   },
   faq: {
     eyebrow: "Good to know",

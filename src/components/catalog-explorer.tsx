@@ -48,7 +48,7 @@ type CatalogSearchDocument = CatalogProduct & { id: number }
 
 interface CatalogEntry {
   product: CatalogProduct
-  serial: number
+  productIndex: number
   price: number | null
   matches: CatalogMatch
 }
@@ -577,10 +577,10 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
     const searchTerm = deferredQuery.trim()
 
     if (!searchTerm) {
-      return products.map((product, index) => ({
+      return products.map((product, productIndex) => ({
         product,
-        serial: index + 1,
-        price: productPrices.at(index) ?? null,
+        productIndex,
+        price: productPrices.at(productIndex) ?? null,
         matches: {},
       }))
     }
@@ -594,21 +594,24 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
         prefix: true,
       })
       .flatMap((result) => {
-        const serial = Number(result.id)
+        const productId = Number(result.id)
         if (
-          !Number.isInteger(serial) ||
-          serial < 1 ||
-          serial > products.length
+          !Number.isInteger(productId) ||
+          productId < 1 ||
+          productId > products.length
         ) {
           return []
         }
 
-        const product = products[serial - 1]
+        const productIndex = productId - 1
+        const product = products.at(productIndex)
+        if (!product) return []
+
         return [
           {
             product,
-            serial,
-            price: productPrices[serial - 1] ?? null,
+            productIndex,
+            price: productPrices.at(productIndex) ?? null,
             matches: result.match,
           },
         ]
@@ -1161,10 +1164,10 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                 <thead className="bg-slate-50 dark:bg-slate-900/70">
                   <tr className="border-y border-border">
                     <th
-                      className="w-[74px] py-3 pl-5 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase sm:pl-7"
+                      className="w-[23%] px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
                       scope="col"
                     >
-                      {copy.tableHeadings.serial}
+                      {copy.tableHeadings.product}
                     </th>
                     <th
                       className="w-[32%] px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
@@ -1173,22 +1176,16 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                       {copy.tableHeadings.ingredient}
                     </th>
                     <th
-                      className="w-[23%] px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
+                      className="w-[20%] px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
                       scope="col"
                     >
-                      {copy.tableHeadings.product}
+                      {copy.tableHeadings.manufacturer}
                     </th>
                     <th
                       className="w-30 px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
                       scope="col"
                     >
                       {copy.tableHeadings.packaging}
-                    </th>
-                    <th
-                      className="w-[20%] px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
-                      scope="col"
-                    >
-                      {copy.tableHeadings.manufacturer}
                     </th>
                     <th
                       className="py-3 pr-5 text-right text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase sm:pr-7"
@@ -1199,7 +1196,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {pageEntries.map(({ product, serial, matches }) => {
+                  {pageEntries.map(({ product, productIndex, matches }) => {
                     const shortContent = truncateIngredient(
                       product.content,
                       fieldTerms(matches, "content")
@@ -1208,10 +1205,14 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                     return (
                       <tr
                         className="border-b border-border/70 transition-colors last:border-0 hover:bg-blue-50/60 dark:hover:bg-blue-950/30"
-                        key={`${serial.toString()}-${product.product}`}
+                        key={`${productIndex.toString()}-${product.product}`}
                       >
-                        <td className="py-3.5 pl-5 text-[0.68rem] text-slate-400 tabular-nums sm:pl-7 dark:text-slate-500">
-                          {serial}
+                        <td className="px-4 py-3.5 text-xs font-bold text-blue-900 dark:text-blue-100">
+                          {highlightForField(
+                            product.product,
+                            matches,
+                            "product"
+                          )}
                         </td>
                         <td
                           aria-label={product.content}
@@ -1226,11 +1227,11 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                             )}
                           </span>
                         </td>
-                        <td className="px-4 py-3.5 text-xs font-bold text-blue-900 dark:text-blue-100">
+                        <td className="max-w-55 px-4 py-3.5 text-[0.68rem] leading-5 font-semibold text-slate-600 dark:text-slate-300">
                           {highlightForField(
-                            product.product,
+                            product.manufacturer,
                             matches,
-                            "product"
+                            "manufacturer"
                           )}
                         </td>
                         <td className="px-4 py-3.5">
@@ -1241,13 +1242,6 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                               "packSize"
                             )}
                           </span>
-                        </td>
-                        <td className="max-w-55 px-4 py-3.5 text-[0.68rem] leading-5 font-semibold text-slate-600 dark:text-slate-300">
-                          {highlightForField(
-                            product.manufacturer,
-                            matches,
-                            "manufacturer"
-                          )}
                         </td>
                         <td className="py-3.5 pr-5 text-right text-xs font-extrabold whitespace-nowrap text-blue-700 tabular-nums sm:pr-7 dark:text-blue-300">
                           {product.rate ? (

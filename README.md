@@ -78,12 +78,24 @@ Set a non-sensitive obfuscation key in `.env` before building the files:
 NEXT_PUBLIC_CATALOG_XOR_KEY=your-obfuscation-key
 ```
 
-The source JSON can stay in the git-ignored `extras/` folder. It is outside `public/`, so Next.js will not copy it into the static export. Example for the July 2026 list on Windows:
+When regenerating the catalog, temporarily copy the source JSON to `public/data/source.json` so the builder and output use the deployment data folder. This raw source is ignored by Git. After generating the `.dat` files, remove `public/data/source.json` **before** running the site build; never publish or commit the raw source.
+
+```bash
+mkdir -p public/data
+cp "/path/to/Price List.json" public/data/source.json
+node scripts/build-catalog.mjs --input public/data/source.json --output public/data
+rm public/data/source.json
+bun run build
+```
+
+PowerShell equivalent:
 
 ```powershell
-node .\\scripts\\build-catalog.mjs `
-  --input "F:\\pct\\extras\\Price List 1 July 2026 minified.json" `
-  --output "F:\\pct\\public\\data"
+New-Item -ItemType Directory -Force public\\data | Out-Null
+Copy-Item "F:\\pct\\Price List.json" public\\data\\source.json
+node .\\scripts\\build-catalog.mjs --input public\\data\\source.json --output public\\data
+Remove-Item public\\data\\source.json
+bun run build
 ```
 
 The output prints all three filenames and the shared random version. It also explains skipped rows: non-object rows and rows without a recognized Product Name are skipped; records with a Product Name but a blank Active Ingredient are retained. The first few skipped row numbers, reasons and source field names are printed so source-format mismatches can be diagnosed rather than hidden in a single total. Common aliases for product, ingredient, manufacturer, packaging and rate headers are supported.
@@ -95,13 +107,13 @@ NEXT_PUBLIC_CATALOG_DATA_URL=/data/catalog.a1b2c3.dat
 NEXT_PUBLIC_CATALOG_XOR_KEY=your-obfuscation-key
 ```
 
-Keep the three companion files together and version-matched when uploading to a CDN. Configure CORS to allow `GET` from the site origin. If serving from `public/data`, Next.js copies the files to `out/data` during the static build. The generated `.dat` files and `extras/` inputs are ignored by Git by default; if you intentionally keep the artifacts in the repository, force-add all three matching files.
+Keep the three companion files together and version-matched when deploying. If serving from `public/data`, Next.js copies the files to `out/data` during the static build. Same-origin Worker hosting needs no CORS configuration; if the catalog is hosted on a different origin, allow `GET` from the site origin. The versioned `.dat` triplet is the deployable catalog and is tracked here; raw source JSON is ignored and must be removed before building.
 
 ```bash
 bun run build
 ```
 
-Serve each `.dat` as binary (`application/octet-stream`) and do not set `Content-Encoding: gzip` on the XOR-obfuscated payload. If you change `.env`, rebuild/redeploy because `NEXT_PUBLIC_*` values are embedded at build time. The loader also accepts the previous combined-dictionary catalog format for migration.
+Serve each `.dat` as binary (`application/octet-stream`) and do not set `Content-Encoding: gzip` on the XOR-obfuscated payload. The `build` script refuses to run if any JSON file remains directly under `public/data`, protecting the temporary source from being copied into the static export. If you change `.env`, rebuild/redeploy because `NEXT_PUBLIC_*` values are embedded at build time. The loader also accepts the previous combined-dictionary catalog format for migration.
 
 ## Site content
 

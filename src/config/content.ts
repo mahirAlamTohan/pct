@@ -85,12 +85,11 @@ export const siteContent = {
     productPlural: "products",
     searchableProducts: "searchable products",
     tableHeadings: {
-      serial: "S. No.",
-      ingredient: "Active ingredient",
-      product: "Product name",
-      packaging: "Packaging",
+      product: "Product Name",
+      ingredient: "Active Ingredient",
       manufacturer: "Manufacturer",
-      rate: "Rate (USD)",
+      packaging: "Packaging",
+      rate: "RATE (USD)",
     },
     status: {
       unconfigured: "Catalog URL not configured. No records are available.",

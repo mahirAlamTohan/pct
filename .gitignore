@@ -15,6 +15,7 @@
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+bun.lock
 bun.lockb
 
 # ==========================================
@@ -23,6 +24,8 @@ bun.lockb
 /build
 /dist
 /out
+# Raw source catalogs are staged here temporarily and must never ship or be committed.
+/public/data/*.json
 /.next/
 /.nuxt/
 /.svelte-kit/
@@ -114,7 +117,6 @@ Desktop.ini
 # Containerization & Deployment Artifacts
 # ==========================================
 /extras/
-/scripts/
 .docker
 *.tar
 *.gz

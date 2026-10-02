@@ -64,10 +64,12 @@ const OUTPUT_FIELDS = {
 
 function printUsage() {
   console.log(`Usage:
-  node scripts/build-catalog.mjs --input <absolute-json-path> --output <absolute-output-folder>
+  node scripts/build-catalog.mjs --input <json-path> --output <output-folder>
+
+Paths may be absolute or relative to the repository root.
 
 PowerShell example:
-  node .\\scripts\\build-catalog.mjs --input "C:\\data\\Price List.json" --output "C:\\data\\catalog-output"
+  node .\\scripts\\build-catalog.mjs --input "public\\data\\source.json" --output "public\\data"
 
 The builder writes catalog.<version>.dat, manufacturers.<version>.dat, and packaging.<version>.dat.
 The XOR key is read from ${XOR_KEY_NAME} in the repository .env file or process environment.`)
@@ -418,16 +420,11 @@ async function main() {
     throw new Error("Both --input and --output are required.")
   }
 
-  if (!path.isAbsolute(input)) {
-    throw new Error(`Input path must be absolute: ${input}`)
-  }
+  const inputPath = path.resolve(REPOSITORY_ROOT, input)
+  const outputPath = path.resolve(REPOSITORY_ROOT, output)
 
-  if (!path.isAbsolute(output)) {
-    throw new Error(`Output folder path must be absolute: ${output}`)
-  }
-
-  if (path.extname(input).toLocaleLowerCase() !== ".json") {
-    throw new Error(`Input file must have a .json extension: ${input}`)
+  if (path.extname(inputPath).toLocaleLowerCase() !== ".json") {
+    throw new Error(`Input file must have a .json extension: ${inputPath}`)
   }
 
   const xorKey = readEnvValue(XOR_KEY_NAME)
@@ -442,7 +439,7 @@ async function main() {
     throw new Error(`${XOR_KEY_NAME} must not be empty.`)
   }
 
-  const inputContents = await readFile(input, "utf8")
+  const inputContents = await readFile(inputPath, "utf8")
   let parsedJson
 
   try {
@@ -482,8 +479,8 @@ async function main() {
     }
   })
 
-  await mkdir(output, { recursive: true })
-  const result = await writeVersionedArtifacts(output, payloads)
+  await mkdir(outputPath, { recursive: true })
+  const result = await writeVersionedArtifacts(outputPath, payloads)
   const filesByName = new Map(
     result.files.map((file) => [
       path.basename(file.outputPath, `.${result.version}.dat`),
@@ -493,7 +490,7 @@ async function main() {
 
   console.log("Catalog build complete")
   console.log(`Version: ${result.version}`)
-  console.log(`Output folder: ${output}`)
+  console.log(`Output folder: ${outputPath}`)
   for (const name of ["catalog", "manufacturers", "packaging"]) {
     const file = filesByName.get(name)
     if (file) {

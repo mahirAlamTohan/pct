@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/check-public-data.mjs && next build",
     "start": "npx --yes serve out",
     "lint": "eslint .",
     "lint:all": "ESLINT_PLUGIN_DIFF_DISABLED=true eslint .",
@@ -36,7 +36,6 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "eslint": "^10.10.0",
-    "eslint-config-next": "16.2.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-diff": "^2.1.7",
@@ -51,5 +50,10 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.70.0"
+  },
+  "overrides": {
+    "eslint-plugin-react-hooks": {
+      "zod-validation-error": "^4.0.0"
+    }
   }
 }

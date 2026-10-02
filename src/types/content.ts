@@ -80,11 +80,10 @@ export interface SiteContent {
     productPlural: string
     searchableProducts: string
     tableHeadings: {
-      serial: string
-      ingredient: string
       product: string
-      packaging: string
+      ingredient: string
       manufacturer: string
+      packaging: string
       rate: string
     }
     status: {

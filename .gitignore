@@ -12,10 +12,10 @@
 !.yarn/versions
 
 # Lockfiles (Uncomment ONLY if you explicitly want to ignore them)
-# pnpm-lock.yaml
-# package-lock.json
-# yarn.lock
-# bun.lockb
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+bun.lockb
 
 # ==========================================
 # Build & Output Framework Targets

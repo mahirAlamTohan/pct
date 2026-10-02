@@ -4,5 +4,8 @@
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page"
+  },
+  "vars": {
+    "NEXT_PUBLIC_CATALOG_DATA_URL": "https://pct.mahiralamtohan.workers.dev/data/catalog.a0274b.dat"
   }
 }

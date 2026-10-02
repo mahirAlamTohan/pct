@@ -106,13 +106,15 @@ test.describe("static catalog experience", () => {
     const betaRow = page.getByRole("row").filter({ hasText: "BETA 20MG" })
     await expect(betaRow).toBeVisible()
     await expect(betaRow).toContainText("Beta Pharmaceuticals Ltd")
-    await expect(betaRow.locator("mark")).toContainText("BETA")
+    await expect(
+      betaRow.getByRole("cell").first().locator("mark")
+    ).toContainText("BETA")
     await expect(
       page.getByRole("row").filter({ hasText: "ALPHA 10MG" })
     ).toHaveCount(0)
 
     await search.fill("")
-    await page.getByRole("button", { name: "Filters" }).click()
+    await page.getByRole("button", { name: "Filters", exact: true }).click()
 
     const manufacturerSearch = page.getByRole("searchbox", {
       name: "Search Manufacturer filters",
@@ -208,7 +210,7 @@ test.describe("static catalog experience", () => {
     expect(darkFooterBackground).not.toBe(lightFooterBackground)
 
     await page.locator("#catalog").scrollIntoViewIfNeeded()
-    await page.getByRole("button", { name: "Filters" }).click()
+    await page.getByRole("button", { name: "Filters", exact: true }).click()
     const betaManufacturer = page.getByRole("button", {
       name: /Manufacturer: Beta Pharmaceuticals Ltd/,
     })
@@ -271,7 +273,7 @@ test.describe("static catalog experience", () => {
   }) => {
     await installCatalogFixtures(page)
     await openCatalog(page)
-    await page.getByRole("button", { name: "Filters" }).click()
+    await page.getByRole("button", { name: "Filters", exact: true }).click()
 
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])

@@ -9,6 +9,8 @@ npm install --no-package-lock --no-audit --no-fund
 npm run test:all
 ```
 
+If you use pnpm, the equivalent is `pnpm install` followed by `pnpm test:all`.
+
 `test:all` generates Next.js route types, builds the production static export, runs ESLint, TypeScript checks, unit/component tests, and then the Chromium end-to-end suite. It continues through every stage and records failures instead of stopping at the first one. If the Playwright-managed Chromium browser is missing, the E2E runner installs it automatically on first use. Playwright starts and stops the local static test server; no separate server terminal is needed. The tests use local, synthetic catalog fixtures and do not send test traffic to production.
 
 The run prints results in the terminal and writes `test-results/full-suite-summary.txt` and `.json`, `playwright-report/index.html`, and `test-results/e2e-results.json`. On browser-test failures, screenshots, traces, and other artifacts are also saved under `test-results/`; share the full-suite summary and E2E JSON/report for review. You can open the HTML report with `npx playwright show-report`.

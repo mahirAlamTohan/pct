@@ -203,6 +203,14 @@ function asText(value) {
   return ""
 }
 
+function numericPrice(value) {
+  const normalized = asText(value).replace(/[$,\s]/g, "")
+  if (!normalized) return null
+
+  const number = Number(normalized)
+  return Number.isFinite(number) && number >= 0 ? number : null
+}
+
 function findField(record, aliases) {
   const aliasesByKey = new Set(aliases.map(normalizeKey))
 
@@ -280,8 +288,37 @@ function normalizeRows(parsedJson) {
     )
   }
 
+  const prices = products
+    .map((product) => numericPrice(product[OUTPUT_FIELDS.rate]))
+    .filter((price) => price !== null)
+  const minPrice =
+    prices.length > 0
+      ? Math.floor(
+          prices.reduce((lowest, price) => Math.min(lowest, price), Infinity) *
+            100
+        ) / 100
+      : 0
+  let maxPrice =
+    prices.length > 0
+      ? Math.ceil(
+          prices.reduce(
+            (highest, price) => Math.max(highest, price),
+            -Infinity
+          ) * 100
+        ) / 100
+      : 1000
+
+  if (maxPrice <= minPrice) {
+    maxPrice = Math.round((minPrice + 0.01) * 100) / 100
+  }
+
   return {
-    catalog: { manufacturers, packaging, products },
+    catalog: {
+      metadata: { minPrice, maxPrice },
+      manufacturers,
+      packaging,
+      products,
+    },
     sourceRows: sourceRows.length,
     skippedRows,
   }
@@ -372,6 +409,9 @@ async function main() {
   )
   console.log(
     `Dictionary values: ${catalog.manufacturers.length.toLocaleString()} manufacturers, ${catalog.packaging.length.toLocaleString()} packaging options`
+  )
+  console.log(
+    `Price metadata: USD ${catalog.metadata.minPrice.toFixed(2)}–${catalog.metadata.maxPrice.toFixed(2)}`
   )
   console.log(`Normalized JSON: ${jsonBytes.length.toLocaleString()} bytes`)
   console.log(

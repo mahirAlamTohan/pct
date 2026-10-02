@@ -5,20 +5,26 @@ import {
   ArrowUpRight,
   CheckCircle2,
   ChevronLeft,
+  CircleCheck,
+  CircleMinus,
   ChevronRight,
   Download,
   LoaderCircle,
+  Plus,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react"
 import MiniSearch, { type SearchResult } from "minisearch"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useEffect, useMemo, useState } from "react"
 
 import { Button, ButtonLink } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
 import { Input } from "@/components/ui/input"
+import { RangeSlider } from "@/components/ui/slider"
 import { siteConfig } from "@/config/site"
 import { siteContent } from "@/config/content"
 import { fetchCatalogData } from "@/data/fetch-catalog"
@@ -27,10 +33,13 @@ import type {
   CatalogExplorerProps,
   CatalogFilterMode,
   CatalogLoadState,
+  CatalogMetadata,
   CatalogProduct,
 } from "@/types/catalog"
 
 const PAGE_SIZE = 10
+const DEFAULT_PRICE_BOUNDS: [number, number] = [0, 1000]
+const PRICE_STEP = 0.01
 const SEARCH_FIELDS = ["content", "product", "packSize", "rate", "manufacturer"]
 
 type CatalogMatch = SearchResult["match"]
@@ -42,13 +51,23 @@ interface CatalogEntry {
   matches: CatalogMatch
 }
 
-interface FacetFilterProps {
+type FacetSelections = Record<
+  "manufacturer" | "packaging",
+  Map<string, CatalogFilterMode>
+>
+
+interface FacetPillGroupProps {
+  kind: "manufacturer" | "packaging"
   label: string
   options: string[]
-  selectedValues: string[]
-  mode: CatalogFilterMode
-  onSelectedValuesChange: (values: string[]) => void
-  onModeChange: (mode: CatalogFilterMode) => void
+  selections: Map<string, CatalogFilterMode>
+  search: string
+  onCycle: (kind: "manufacturer" | "packaging", value: string) => void
+}
+
+interface SelectionSummaryItem {
+  key: string
+  label: string
 }
 
 function normalize(value: string) {
@@ -84,6 +103,32 @@ function formatMessage(template: string, values: Record<string, string>) {
     (message, [key, value]) => message.replaceAll(`{${key}}`, value),
     template
   )
+}
+
+function resolvePriceBounds(metadata?: CatalogMetadata): [number, number] {
+  if (!metadata) return [...DEFAULT_PRICE_BOUNDS]
+
+  const minPrice = metadata.minPrice
+  const maxPrice = metadata.maxPrice
+
+  if (
+    !Number.isFinite(minPrice) ||
+    !Number.isFinite(maxPrice) ||
+    minPrice < 0 ||
+    maxPrice <= minPrice
+  ) {
+    return [...DEFAULT_PRICE_BOUNDS]
+  }
+
+  return [minPrice, maxPrice]
+}
+
+function formatPrice(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    currency: "USD",
+    maximumFractionDigits: 2,
+    style: "currency",
+  }).format(value)
 }
 
 function HighlightedText({ text, terms }: { text: string; terms: string[] }) {
@@ -159,89 +204,103 @@ function truncateIngredient(content: string, matchedTerms: string[] = []) {
   return `${prefix.slice(0, lastSpace > 70 ? lastSpace : maximumLength).trimEnd()}…`
 }
 
-function FacetFilter({
+function cycleSelection(
+  selections: Map<string, CatalogFilterMode>,
+  value: string
+) {
+  const nextSelections = new Map(selections)
+  const currentMode = nextSelections.get(value)
+  const nextMode =
+    currentMode === "include"
+      ? "exclude"
+      : currentMode === "exclude"
+        ? undefined
+        : "include"
+
+  if (nextMode) nextSelections.set(value, nextMode)
+  else nextSelections.delete(value)
+
+  return nextSelections
+}
+
+function FacetPillGroup({
+  kind,
   label,
   options,
-  selectedValues,
-  mode,
-  onSelectedValuesChange,
-  onModeChange,
-}: FacetFilterProps) {
+  selections,
+  search,
+  onCycle,
+}: FacetPillGroupProps) {
   const copy = siteContent.catalog
-  const normalizedLabel = label.toLocaleLowerCase()
-  const [search, setSearch] = useState("")
-  const selected = useMemo(() => new Set(selectedValues), [selectedValues])
   const visibleOptions = options.filter((option) =>
     normalize(option).includes(normalize(search.trim()))
   )
 
-  function toggleOption(option: string, checked: boolean) {
-    onSelectedValuesChange(
-      checked
-        ? [...selectedValues, option]
-        : selectedValues.filter((value) => value !== option)
-    )
-  }
-
   return (
     <fieldset className="min-w-0 space-y-2.5">
       <legend className="flex w-full items-center justify-between gap-2 text-xs font-extrabold text-ink-soft dark:text-foreground">
-        {label}
-        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[0.62rem] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-200">
+        <span>{label}</span>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.62rem] font-bold text-primary">
           {formatMessage(copy.selectedCount, {
-            count: selectedValues.length.toLocaleString(),
+            count: selections.size.toLocaleString(),
           })}
         </span>
       </legend>
 
-      <select
-        aria-label={formatMessage(copy.facetModeAriaLabel, { label })}
-        className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-xs font-semibold text-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25"
-        onChange={(event) => {
-          onModeChange(event.target.value as CatalogFilterMode)
-        }}
-        value={mode}
-      >
-        <option value="include">{copy.includeSelected}</option>
-        <option value="exclude">{copy.excludeSelected}</option>
-      </select>
-
-      <Input
-        aria-label={formatMessage(copy.facetSearchAriaLabel, {
-          label: normalizedLabel,
-        })}
-        autoComplete="off"
-        className="h-9 text-xs"
-        onChange={(event) => {
-          setSearch(event.target.value)
-        }}
-        placeholder={formatMessage(copy.facetSearchPlaceholder, {
-          label: normalizedLabel,
-        })}
-        type="search"
-        value={search}
-      />
-
-      <div className="max-h-44 scrollbar-thin space-y-0.5 overflow-y-auto rounded-xl border border-border bg-background/70 p-1.5">
+      <div className="max-h-40 overflow-y-auto rounded-xl border border-border/80 bg-background/55 p-2">
         {visibleOptions.length > 0 ? (
-          visibleOptions.map((option) => (
-            <label
-              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-ink-soft transition-colors hover:bg-accent dark:text-slate-200"
-              key={option}
-            >
-              <input
-                checked={selected.has(option)}
-                className="size-3.5 shrink-0 accent-primary"
-                onChange={(event) => {
-                  toggleOption(option, event.target.checked)
-                }}
-                type="checkbox"
-              />
-              <span className="min-w-0 truncate" title={option}>
-                {option}
-              </span>
-            </label>
-          ))
+          <div className="flex flex-wrap gap-2">
+            {visibleOptions.map((option) => {
+              const mode = selections.get(option)
+              const modeLabel =
+                mode === "include"
+                  ? copy.includeSelected
+                  : mode === "exclude"
+                    ? copy.excludeSelected
+                    : copy.unselectedLabel
+              const ModeIcon =
+                mode === "include"
+                  ? CircleCheck
+                  : mode === "exclude"
+                    ? CircleMinus
+                    : Plus
+
+              return (
+                <Button
+                  aria-label={formatMessage(copy.facetCycleAriaLabel, {
+                    label: `${label}: ${option}`,
+                    mode: modeLabel,
+                  })}
+                  aria-pressed={Boolean(mode)}
+                  className={cn(
+                    "h-auto min-h-9 max-w-full justify-start gap-2 rounded-full px-3 py-1.5 text-xs transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
+                    mode === "include" &&
+                      "border-primary bg-primary text-white shadow-md shadow-primary/15 hover:border-primary hover:bg-primary/90 hover:text-white",
+                    mode === "exclude" &&
+                      "border-violet-500 bg-violet-600 text-white shadow-md shadow-violet-900/15 hover:border-violet-600 hover:bg-violet-700 hover:text-white",
+                    !mode &&
+                      "border-border bg-background text-ink-soft hover:border-primary/45 hover:bg-accent dark:text-foreground"
+                  )}
+                  data-selection-state={mode ?? "none"}
+                  key={`${kind}-${option}`}
+                  onClick={() => {
+                    onCycle(kind, option)
+                  }}
+                  title={option}
+                  type="button"
+                  variant="outline"
+                >
+                  <ModeIcon aria-hidden="true" className="size-3.5 shrink-0" />
+                  <span className="min-w-0 truncate">{option}</span>
+                  {mode && (
+                    <span className="rounded-full bg-white/15 px-1.5 py-0.5 text-[0.54rem] font-extrabold tracking-wide uppercase">
+                      {modeLabel}
+                    </span>
+                  )}
+                </Button>
+              )
+            })}
+          </div>
         ) : (
           <p className="m-0 px-2 py-3 text-xs text-muted-foreground">
             {options.length === 0 ? copy.noFacetValues : copy.noFacetMatches}
@@ -249,6 +308,65 @@ function FacetFilter({
         )}
       </div>
     </fieldset>
+  )
+}
+
+function SelectionSummary({
+  title,
+  items,
+  emptyMessage,
+  mode,
+}: {
+  title: string
+  items: SelectionSummaryItem[]
+  emptyMessage: string
+  mode: CatalogFilterMode
+}) {
+  const Icon = mode === "include" ? CircleCheck : CircleMinus
+
+  return (
+    <section
+      aria-label={title}
+      className="min-w-0 rounded-2xl border border-border/80 bg-background/60 p-3.5"
+    >
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <h5 className="m-0 inline-flex items-center gap-2 text-xs font-extrabold text-ink-soft dark:text-foreground">
+          <Icon
+            aria-hidden="true"
+            className={cn(
+              "size-4",
+              mode === "include" ? "text-primary" : "text-violet-500"
+            )}
+          />
+          {title}
+        </h5>
+        <span className="text-[0.62rem] font-semibold text-muted-foreground">
+          {items.length.toLocaleString()}
+        </span>
+      </div>
+      {items.length > 0 ? (
+        <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+          {items.map((item) => (
+            <span
+              className={cn(
+                "max-w-full truncate rounded-full border px-2.5 py-1 text-[0.65rem] font-bold",
+                mode === "include"
+                  ? "border-primary/20 bg-primary/10 text-primary"
+                  : "border-violet-500/20 bg-violet-500/10 text-violet-700 dark:text-violet-200"
+              )}
+              key={item.key}
+              title={item.label}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="m-0 min-h-7 text-[0.68rem] leading-5 text-muted-foreground">
+          {emptyMessage}
+        </p>
+      )}
+    </section>
   )
 }
 
@@ -271,16 +389,20 @@ export function CatalogExplorer({
   )
   const [loadError, setLoadError] = useState("")
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [minimumPrice, setMinimumPrice] = useState("")
-  const [maximumPrice, setMaximumPrice] = useState("")
-  const [manufacturerMode, setManufacturerMode] =
-    useState<CatalogFilterMode>("include")
-  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>(
-    []
+  const [facetSearch, setFacetSearch] = useState("")
+  const [priceBounds, setPriceBounds] = useState<[number, number]>(() => [
+    ...DEFAULT_PRICE_BOUNDS,
+  ])
+  const [priceRange, setPriceRange] = useState<[number, number]>(() => [
+    ...DEFAULT_PRICE_BOUNDS,
+  ])
+  const [facetSelections, setFacetSelections] = useState<FacetSelections>(
+    () => ({
+      manufacturer: new Map(),
+      packaging: new Map(),
+    })
   )
-  const [packagingMode, setPackagingMode] =
-    useState<CatalogFilterMode>("include")
-  const [selectedPackaging, setSelectedPackaging] = useState<string[]>([])
+  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (!catalogDataUrl) return
@@ -308,6 +430,9 @@ export function CatalogExplorer({
             ? dataset.packaging
             : distinctValues(dataset.products.map(({ packSize }) => packSize))
         )
+        const nextPriceBounds = resolvePriceBounds(dataset.metadata)
+        setPriceBounds(nextPriceBounds)
+        setPriceRange(nextPriceBounds)
         setPage(1)
         setLoadState("loaded")
       })
@@ -384,52 +509,90 @@ export function CatalogExplorer({
       })
   }, [products, query, searchIndex])
 
-  const manufacturerSet = useMemo(
-    () => new Set(selectedManufacturers),
-    [selectedManufacturers]
+  const includedManufacturers = useMemo(
+    () =>
+      new Set(
+        Array.from(facetSelections.manufacturer.entries())
+          .filter(([, mode]) => mode === "include")
+          .map(([value]) => value)
+      ),
+    [facetSelections.manufacturer]
   )
-  const packagingSet = useMemo(
-    () => new Set(selectedPackaging),
-    [selectedPackaging]
+  const excludedManufacturers = useMemo(
+    () =>
+      new Set(
+        Array.from(facetSelections.manufacturer.entries())
+          .filter(([, mode]) => mode === "exclude")
+          .map(([value]) => value)
+      ),
+    [facetSelections.manufacturer]
   )
-  const filteredEntries = useMemo(() => {
-    const minimum = numericValue(minimumPrice)
-    const maximum = numericValue(maximumPrice)
+  const includedPackaging = useMemo(
+    () =>
+      new Set(
+        Array.from(facetSelections.packaging.entries())
+          .filter(([, mode]) => mode === "include")
+          .map(([value]) => value)
+      ),
+    [facetSelections.packaging]
+  )
+  const excludedPackaging = useMemo(
+    () =>
+      new Set(
+        Array.from(facetSelections.packaging.entries())
+          .filter(([, mode]) => mode === "exclude")
+          .map(([value]) => value)
+      ),
+    [facetSelections.packaging]
+  )
+  const priceRangeActive =
+    priceRange[0] > priceBounds[0] + PRICE_STEP / 2 ||
+    priceRange[1] < priceBounds[1] - PRICE_STEP / 2
 
-    return searchEntries.filter(({ product }) => {
-      const price = numericValue(product.rate)
-      if (minimum !== null && (price === null || price < minimum)) return false
-      if (maximum !== null && (price === null || price > maximum)) return false
+  const filteredEntries = useMemo(
+    () =>
+      searchEntries.filter(({ product }) => {
+        const price = numericValue(product.rate)
+        if (
+          priceRangeActive &&
+          (price === null || price < priceRange[0] || price > priceRange[1])
+        ) {
+          return false
+        }
 
-      if (manufacturerSet.size > 0) {
-        const isSelected = manufacturerSet.has(product.manufacturer)
-        if (manufacturerMode === "include" && !isSelected) return false
-        if (manufacturerMode === "exclude" && isSelected) return false
-      }
+        if (
+          includedManufacturers.size > 0 &&
+          !includedManufacturers.has(product.manufacturer)
+        ) {
+          return false
+        }
+        if (excludedManufacturers.has(product.manufacturer)) return false
 
-      if (packagingSet.size > 0) {
-        const isSelected = packagingSet.has(product.packSize)
-        if (packagingMode === "include" && !isSelected) return false
-        if (packagingMode === "exclude" && isSelected) return false
-      }
+        if (
+          includedPackaging.size > 0 &&
+          !includedPackaging.has(product.packSize)
+        ) {
+          return false
+        }
+        if (excludedPackaging.has(product.packSize)) return false
 
-      return true
-    })
-  }, [
-    searchEntries,
-    minimumPrice,
-    maximumPrice,
-    manufacturerSet,
-    manufacturerMode,
-    packagingSet,
-    packagingMode,
-  ])
+        return true
+      }),
+    [
+      searchEntries,
+      priceRange,
+      priceRangeActive,
+      includedManufacturers,
+      excludedManufacturers,
+      includedPackaging,
+      excludedPackaging,
+    ]
+  )
 
-  const activeFilterCount =
-    Number(minimumPrice.trim().length > 0) +
-    Number(maximumPrice.trim().length > 0) +
-    selectedManufacturers.length +
-    selectedPackaging.length
+  const selectedFacetCount =
+    facetSelections.manufacturer.size + facetSelections.packaging.size
+  const activeFilterCount = selectedFacetCount + Number(priceRangeActive)
+
   const pageCount = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const firstProductIndex = (currentPage - 1) * PAGE_SIZE
@@ -448,15 +611,59 @@ export function CatalogExplorer({
     setPage(1)
   }
 
+  function cycleFacet(kind: "manufacturer" | "packaging", value: string) {
+    setFacetSelections((current) => {
+      if (kind === "manufacturer") {
+        return {
+          ...current,
+          manufacturer: cycleSelection(current.manufacturer, value),
+        }
+      }
+
+      return {
+        ...current,
+        packaging: cycleSelection(current.packaging, value),
+      }
+    })
+    setPage(1)
+  }
+
   function clearFilters() {
     setPage(1)
-    setMinimumPrice("")
-    setMaximumPrice("")
-    setSelectedManufacturers([])
-    setSelectedPackaging([])
-    setManufacturerMode("include")
-    setPackagingMode("include")
+    setPriceRange(priceBounds)
+    setFacetSearch("")
+    setFacetSelections({
+      manufacturer: new Map(),
+      packaging: new Map(),
+    })
   }
+
+  function summaryItemsFor(mode: CatalogFilterMode) {
+    const selectedValues = [
+      {
+        kind: "manufacturer",
+        label: copy.manufacturerLabel,
+        selections: facetSelections.manufacturer,
+      },
+      {
+        kind: "packaging",
+        label: copy.packagingLabel,
+        selections: facetSelections.packaging,
+      },
+    ]
+
+    return selectedValues.flatMap(({ kind, label, selections }) =>
+      Array.from(selections.entries())
+        .filter(([, selectionMode]) => selectionMode === mode)
+        .map(([value]) => ({
+          key: `${kind}:${value}`,
+          label: `${label}: ${value}`,
+        }))
+    )
+  }
+
+  const includedSummary = summaryItemsFor("include")
+  const excludedSummary = summaryItemsFor("exclude")
 
   const statusMessage = (() => {
     switch (loadState) {
@@ -570,22 +777,9 @@ export function CatalogExplorer({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <Button
-                  className="h-9 border-border bg-background px-3 text-xs text-muted-foreground hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950"
-                  disabled={!query}
-                  onClick={() => {
-                    updateQuery("")
-                  }}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                >
-                  <X aria-hidden="true" />
-                  {copy.clearSearchAction}
-                </Button>
-                <Button
                   aria-controls="catalog-filters"
                   aria-expanded={filtersOpen}
-                  className="h-9 border-border bg-background px-3 text-xs text-ink-soft hover:bg-blue-50 dark:text-foreground dark:hover:bg-blue-950"
+                  className="h-10 border-border bg-background px-3.5 text-xs text-ink-soft shadow-sm hover:border-primary/35 hover:bg-accent dark:text-foreground"
                   onClick={() => {
                     setFiltersOpen((open) => !open)
                   }}
@@ -593,18 +787,33 @@ export function CatalogExplorer({
                   type="button"
                   variant="outline"
                 >
-                  <SlidersHorizontal aria-hidden="true" />
-                  {copy.filtersAction}
+                  {filtersOpen ? (
+                    <X aria-hidden="true" />
+                  ) : (
+                    <SlidersHorizontal aria-hidden="true" />
+                  )}
+                  {filtersOpen ? copy.closeFiltersAction : copy.filtersAction}
                   {activeFilterCount > 0 && (
                     <span className="grid min-w-5 place-items-center rounded-full bg-primary px-1 text-[0.62rem] font-extrabold text-white">
                       {activeFilterCount}
                     </span>
                   )}
                 </Button>
+                <Button
+                  className="h-10 border-border bg-background px-3.5 text-xs text-muted-foreground hover:border-primary/35 hover:bg-accent hover:text-foreground"
+                  disabled={activeFilterCount === 0}
+                  onClick={clearFilters}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <RotateCcw aria-hidden="true" />
+                  {copy.clearFiltersAction}
+                </Button>
               </div>
 
               <ButtonLink
-                className="min-h-9 gap-1.5 bg-blue-50 px-3 text-xs text-blue-800 hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md dark:bg-blue-950 dark:text-blue-100 dark:hover:bg-blue-900"
+                className="min-h-10 gap-1.5 bg-blue-50 px-3.5 text-xs text-blue-800 shadow-sm hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md dark:bg-blue-950 dark:text-blue-100 dark:hover:bg-blue-900"
                 href={siteConfig.catalog.pdfUrl || "#catalog"}
                 rel="noreferrer"
                 size="sm"
@@ -618,116 +827,144 @@ export function CatalogExplorer({
             </div>
           </div>
 
-          {filtersOpen && (
-            <div
-              className="grid gap-5 border-y border-border bg-slate-50/80 p-5 sm:grid-cols-2 sm:px-7 lg:grid-cols-[minmax(190px,0.72fr)_minmax(0,1fr)_minmax(0,1fr)] dark:bg-slate-950/30"
-              id="catalog-filters"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <h4 className="m-0 text-xs font-extrabold text-ink-soft dark:text-foreground">
-                    {copy.priceRangeTitle}
-                  </h4>
-                  <span className="text-[0.62rem] font-medium text-muted-foreground">
-                    {copy.priceUnit}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <label className="min-w-0 space-y-1.5">
-                    <span className="text-[0.62rem] font-bold text-muted-foreground">
-                      {copy.minimumPriceLabel}
-                    </span>
-                    <Input
-                      aria-label={copy.minimumPriceAriaLabel}
-                      className="h-9 text-xs tabular-nums"
-                      min="0"
-                      onChange={(event) => {
-                        setMinimumPrice(event.target.value)
+          <AnimatePresence initial={false}>
+            {filtersOpen && (
+              <motion.div
+                animate={{ height: "auto", opacity: 1, y: 0 }}
+                className="overflow-hidden"
+                exit={{ height: 0, opacity: 0, y: -8 }}
+                initial={
+                  prefersReducedMotion
+                    ? { opacity: 0 }
+                    : { height: 0, opacity: 0, y: -8 }
+                }
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0.01 }
+                    : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }
+                }
+              >
+                <div
+                  aria-label={copy.filtersAction}
+                  className="border-y border-border bg-slate-50/80 p-5 sm:px-7 dark:bg-slate-950/30"
+                  id="catalog-filters"
+                  role="region"
+                >
+                  <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                    <div className="min-w-0 space-y-4">
+                      <label className="flex min-h-10 items-center gap-2.5 rounded-xl border border-input bg-background px-3 text-muted-foreground shadow-sm transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/10">
+                        <Search
+                          aria-hidden="true"
+                          className="size-4 shrink-0 text-primary"
+                        />
+                        <span className="sr-only">
+                          {copy.facetSearchAllAriaLabel}
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:border-transparent focus-visible:ring-0"
+                          onChange={(event) => {
+                            setFacetSearch(event.target.value)
+                          }}
+                          placeholder={copy.facetSearchAllPlaceholder}
+                          type="search"
+                          value={facetSearch}
+                        />
+                      </label>
+
+                      <div className="grid min-w-0 gap-4 md:grid-cols-2">
+                        <FacetPillGroup
+                          kind="manufacturer"
+                          label={copy.manufacturerLabel}
+                          onCycle={cycleFacet}
+                          options={manufacturerOptions}
+                          search={facetSearch}
+                          selections={facetSelections.manufacturer}
+                        />
+                        <FacetPillGroup
+                          kind="packaging"
+                          label={copy.packagingLabel}
+                          onCycle={cycleFacet}
+                          options={packagingOptions}
+                          search={facetSearch}
+                          selections={facetSelections.packaging}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                      <SelectionSummary
+                        emptyMessage={copy.noIncludedFilters}
+                        items={includedSummary}
+                        mode="include"
+                        title={copy.includedFiltersTitle}
+                      />
+                      <SelectionSummary
+                        emptyMessage={copy.noExcludedFilters}
+                        items={excludedSummary}
+                        mode="exclude"
+                        title={copy.excludedFiltersTitle}
+                      />
+                    </div>
+                  </div>
+
+                  <section className="mt-5 rounded-2xl border border-border/80 bg-background/75 p-4 sm:p-5">
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h4 className="m-0 text-xs font-extrabold text-ink-soft dark:text-foreground">
+                          {copy.priceRangeTitle}
+                        </h4>
+                        <p className="m-0 mt-1 text-[0.68rem] text-muted-foreground">
+                          {copy.priceLimitHelp}
+                        </p>
+                      </div>
+                      <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-extrabold text-primary tabular-nums">
+                        {formatPrice(priceRange[0])} –{" "}
+                        {formatPrice(priceRange[1])}
+                      </span>
+                    </div>
+                    <RangeSlider
+                      max={priceBounds[1]}
+                      maximumLabel={copy.maximumPriceAriaLabel}
+                      min={priceBounds[0]}
+                      minimumLabel={copy.minimumPriceAriaLabel}
+                      onValueChange={(nextRange) => {
+                        setPriceRange(nextRange)
                         setPage(1)
                       }}
-                      placeholder={copy.noMinimumPrice}
-                      step="0.01"
-                      type="number"
-                      value={minimumPrice}
+                      step={PRICE_STEP}
+                      value={priceRange}
                     />
-                  </label>
-                  <label className="min-w-0 space-y-1.5">
-                    <span className="text-[0.62rem] font-bold text-muted-foreground">
-                      {copy.maximumPriceLabel}
-                    </span>
-                    <Input
-                      aria-label={copy.maximumPriceAriaLabel}
-                      className="h-9 text-xs tabular-nums"
-                      min="0"
-                      onChange={(event) => {
-                        setMaximumPrice(event.target.value)
-                        setPage(1)
-                      }}
-                      placeholder={copy.noMaximumPrice}
-                      step="0.01"
-                      type="number"
-                      value={maximumPrice}
-                    />
-                  </label>
+                    <div className="mt-1 flex justify-between text-[0.62rem] font-semibold text-muted-foreground tabular-nums">
+                      <span>
+                        {copy.minimumPriceLabel}: {formatPrice(priceBounds[0])}
+                      </span>
+                      <span>
+                        {copy.maximumPriceLabel}: {formatPrice(priceBounds[1])}
+                      </span>
+                    </div>
+                  </section>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-3">
+                    <p
+                      aria-live="polite"
+                      className="m-0 text-xs font-semibold text-muted-foreground"
+                    >
+                      {filteredEntries.length.toLocaleString()} {"matching "}
+                      {filteredEntries.length === 1
+                        ? copy.productSingular
+                        : copy.productPlural}
+                    </p>
+                    <p className="m-0 text-[0.62rem] text-muted-foreground">
+                      {formatMessage(copy.selectedCount, {
+                        count: selectedFacetCount.toLocaleString(),
+                      })}
+                    </p>
+                  </div>
                 </div>
-                <p className="m-0 text-[0.65rem] leading-5 text-muted-foreground">
-                  {copy.priceLimitHelp}
-                </p>
-              </div>
-
-              <FacetFilter
-                label={copy.manufacturerLabel}
-                mode={manufacturerMode}
-                onModeChange={(mode) => {
-                  setManufacturerMode(mode)
-                  setPage(1)
-                }}
-                onSelectedValuesChange={(values) => {
-                  setSelectedManufacturers(values)
-                  setPage(1)
-                }}
-                options={manufacturerOptions}
-                selectedValues={selectedManufacturers}
-              />
-              <FacetFilter
-                label={copy.packagingLabel}
-                mode={packagingMode}
-                onModeChange={(mode) => {
-                  setPackagingMode(mode)
-                  setPage(1)
-                }}
-                onSelectedValuesChange={(values) => {
-                  setSelectedPackaging(values)
-                  setPage(1)
-                }}
-                options={packagingOptions}
-                selectedValues={selectedPackaging}
-              />
-
-              <div className="flex items-center justify-between gap-3 sm:col-span-2 lg:col-span-3">
-                <p
-                  className="m-0 text-xs text-muted-foreground"
-                  aria-live="polite"
-                >
-                  {filteredEntries.length.toLocaleString()} {"matching "}
-                  {filteredEntries.length === 1
-                    ? copy.productSingular
-                    : copy.productPlural}
-                </p>
-                <Button
-                  className="h-8 px-2.5 text-xs text-blue-700 hover:bg-blue-100 dark:text-blue-300 dark:hover:bg-blue-950"
-                  disabled={activeFilterCount === 0}
-                  onClick={clearFilters}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  <X aria-hidden="true" />
-                  {copy.clearFiltersAction}
-                </Button>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div
             aria-live="polite"

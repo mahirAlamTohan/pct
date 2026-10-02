@@ -116,3 +116,6 @@ catalog.*.dat
 .docker
 *.tar
 *.gz
+
+
+/extras/

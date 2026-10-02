@@ -186,6 +186,27 @@ function resolveDictionaryValue(
   return dictionary.at(value) ?? ""
 }
 
+function normalizePriceMetadata(value: unknown) {
+  const metadata = asRecord(value)
+  if (!metadata) return undefined
+
+  const minPrice =
+    typeof metadata.minPrice === "number" ? metadata.minPrice : Number.NaN
+  const maxPrice =
+    typeof metadata.maxPrice === "number" ? metadata.maxPrice : Number.NaN
+
+  if (
+    !Number.isFinite(minPrice) ||
+    !Number.isFinite(maxPrice) ||
+    minPrice < 0 ||
+    maxPrice <= minPrice
+  ) {
+    return undefined
+  }
+
+  return { minPrice, maxPrice }
+}
+
 function normalizeLegacyRows(rows: unknown[]): CatalogDataset {
   const products = rows.flatMap((row) => {
     const record = asRecord(row)
@@ -232,7 +253,12 @@ export function normalizeCatalogData(value: unknown): CatalogDataset {
       return product ? [product] : []
     })
 
-    return { products, manufacturers, packaging }
+    return {
+      products,
+      manufacturers,
+      packaging,
+      metadata: normalizePriceMetadata(record.metadata),
+    }
   }
 
   return normalizeLegacyRows(rowsFrom(value))

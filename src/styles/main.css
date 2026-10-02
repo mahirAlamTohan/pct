@@ -27,6 +27,8 @@
   --ink-soft: #243b5b;
   --brand-blue: #246dd1;
   --brand-deep: #153866;
+  --whatsapp: #20c66b;
+  --whatsapp-hover: #18b85f;
   --surface-tint: #edf5ff;
   --header-strip: #132b50;
   --header-strip-foreground: #e7effb;
@@ -49,9 +51,14 @@
   --contact-start: #153866;
   --contact-middle: #124b92;
   --contact-end: #1d65b8;
-  --footer-start: #dceaff;
-  --footer-middle: #eaf3ff;
-  --footer-end: #dfeafd;
+  --footer-start: #071729;
+  --footer-middle: #0d2744;
+  --footer-end: #091c31;
+  --footer-foreground: #e5eefb;
+  --footer-muted: #9aadc4;
+  --footer-accent: #82b7ff;
+  --footer-border: #263d59;
+  --footer-card: #10253c;
   --header-shadow-rest: 0 1px 0 rgb(30 58 93 / 6%);
   --header-shadow-floating: 0 14px 38px rgb(20 48 84 / 16%);
   --elevation-soft: 0 16px 46px rgb(22 54 97 / 9%);
@@ -82,6 +89,8 @@
   --ink-soft: #c9dbf0;
   --brand-blue: #70adff;
   --brand-deep: #10294a;
+  --whatsapp: #20c66b;
+  --whatsapp-hover: #18b85f;
   --surface-tint: #0d2035;
   --header-strip: #061326;
   --header-strip-foreground: #c7d9ef;
@@ -107,6 +116,11 @@
   --footer-start: #0d2035;
   --footer-middle: #10253c;
   --footer-end: #0b1c30;
+  --footer-foreground: #cbd5e1;
+  --footer-muted: #94a3b8;
+  --footer-accent: #7eb1ff;
+  --footer-border: #1e293b;
+  --footer-card: #0f172a;
   --header-shadow-rest: 0 1px 0 rgb(0 0 0 / 16%);
   --header-shadow-floating: 0 14px 38px rgb(0 0 0 / 30%);
   --elevation-soft: 0 20px 55px rgb(0 0 0 / 25%);
@@ -138,6 +152,8 @@
   --color-ink-soft: var(--ink-soft);
   --color-brand-blue: var(--brand-blue);
   --color-brand-deep: var(--brand-deep);
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-hover: var(--whatsapp-hover);
   --color-surface-tint: var(--surface-tint);
   --color-header-strip: var(--header-strip);
   --color-header-strip-foreground: var(--header-strip-foreground);
@@ -163,6 +179,11 @@
   --color-footer-start: var(--footer-start);
   --color-footer-middle: var(--footer-middle);
   --color-footer-end: var(--footer-end);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-footer-muted: var(--footer-muted);
+  --color-footer-accent: var(--footer-accent);
+  --color-footer-border: var(--footer-border);
+  --color-footer-card: var(--footer-card);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

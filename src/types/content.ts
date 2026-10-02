@@ -14,6 +14,11 @@ export interface SiteContent {
     mainNavigationLabel: string
     mobileNavigationLabel: string
     footerNavigationLabel: string
+    contactUsAction: string
+    callUsAction: string
+    emailUsAction: string
+    closeContactOptionsLabel: string
+    contactOptionsLabel: string
   }
   hero: {
     eyebrow: string
@@ -48,6 +53,15 @@ export interface SiteContent {
     loadErrorAdvice: string
     paginationLabel: string
     filtersAction: string
+    closeFiltersAction: string
+    facetSearchAllAriaLabel: string
+    facetSearchAllPlaceholder: string
+    includedFiltersTitle: string
+    excludedFiltersTitle: string
+    noIncludedFilters: string
+    noExcludedFilters: string
+    facetCycleAriaLabel: string
+    unselectedLabel: string
     priceRangeTitle: string
     priceUnit: string
     minimumPriceLabel: string

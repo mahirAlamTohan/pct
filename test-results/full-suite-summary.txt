@@ -1,0 +1,15 @@
+PCT full verification summary
+Status: FAILED
+Started: 2026-10-02T19:22:58.949Z
+Finished: 2026-10-02T19:23:30.989Z
+Duration: 32.0s
+
+PASS  Generate Next.js route types (0.8s, exit 0)
+PASS  Production static build (9.7s, exit 0)
+PASS  ESLint (2.7s, exit 0)
+PASS  TypeScript (3.1s, exit 0)
+PASS  Unit and component tests (5.1s, exit 0)
+FAIL  Chromium end-to-end tests (10.5s, exit 1)
+
+Playwright HTML report: playwright-report/index.html
+Playwright JSON report: test-results/e2e-results.json

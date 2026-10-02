@@ -13,6 +13,7 @@
 
 # Lockfiles (Uncomment ONLY if you explicitly want to ignore them)
 pnpm-lock.yaml
+pnpm-workspace.yaml
 package-lock.json
 yarn.lock
 bun.lock
@@ -71,8 +72,6 @@ bun.lockb
 /.nyc_output
 /cypress/videos
 /cypress/screenshots
-/playwright-report/
-/test-results/
 
 # ==========================================
 # Debug & Runtime Logs

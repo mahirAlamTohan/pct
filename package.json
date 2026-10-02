@@ -9,9 +9,6 @@
     "start": "npx --yes serve out",
     "lint": "eslint .",
     "lint:all": "ESLINT_PLUGIN_DIFF_DISABLED=true eslint .",
-    "prepare": "husky",
-    "commit": "cz",
-    "release": "standard-version",
     "format": "prettier --write \"**/*.{ts,tsx,css,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
@@ -51,7 +48,6 @@
     "eslint-plugin-tailwindcss": "^4.4.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "standard-version": "^9.5.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.70.0"

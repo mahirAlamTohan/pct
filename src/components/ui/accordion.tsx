@@ -41,7 +41,7 @@ export function AccordionTrigger({
       <BaseAccordion.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "group flex min-h-16 flex-1 items-center justify-between gap-4 text-left text-sm font-semibold text-foreground transition-colors hover:text-primary focus-visible:relative focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50",
+          "group flex min-h-16 flex-1 items-center justify-between gap-4 text-left text-sm font-semibold text-foreground transition-colors hover:text-primary-text focus-visible:relative focus-visible:z-1 focus-visible:outline-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50",
           className
         )}
         {...props}
@@ -49,7 +49,7 @@ export function AccordionTrigger({
         {children}
         <ChevronDown
           aria-hidden="true"
-          className="size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-out group-data-panel-open:rotate-180 group-data-panel-open:text-primary"
+          className="size-4 shrink-0 text-muted-foreground transition-transform duration-300 ease-out group-data-panel-open:rotate-180 group-data-panel-open:text-primary-text"
         />
       </BaseAccordion.Trigger>
     </BaseAccordion.Header>

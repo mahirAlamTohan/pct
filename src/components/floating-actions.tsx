@@ -61,7 +61,7 @@ export function FloatingActions() {
             transition={panelTransition}
           >
             <div className="mb-2.5 flex items-center gap-2 px-1.5 py-1">
-              <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary dark:bg-primary/20">
+              <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary-text dark:bg-primary/20">
                 <Headset aria-hidden="true" className="size-4" />
               </span>
               <span className="text-sm font-extrabold text-foreground">

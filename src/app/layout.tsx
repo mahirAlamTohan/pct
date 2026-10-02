@@ -29,7 +29,7 @@ const openGraphDescription =
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#246dd1",
+  themeColor: "#1f5fb5",
 }
 
 export const metadata: Metadata = {

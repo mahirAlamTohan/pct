@@ -20,6 +20,11 @@ const fixtureEnvironment = {
   ...process.env,
   NEXT_PUBLIC_CATALOG_DATA_URL: "/__fixtures__/catalog.a1b2c3.dat",
   NEXT_PUBLIC_CATALOG_XOR_KEY: "pct-e2e-fixture-key-not-a-secret",
+  NEXT_PUBLIC_CONTACT_PHONE: "+1-202-555-0100",
+  NEXT_PUBLIC_WHATSAPP_NUMBER: "12025550100",
+  NEXT_PUBLIC_CONTACT_EMAIL: "support@example.test",
+  NEXT_PUBLIC_SUPPORT_HOURS: "Weekdays, 09:00–17:00 UTC",
+  NEXT_PUBLIC_CATALOG_PDF_URL: "https://example.test/catalog.pdf",
 }
 
 function runPackageStep(args, env, label) {

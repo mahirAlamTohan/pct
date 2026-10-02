@@ -36,12 +36,12 @@ export function AboutContactSection() {
   return (
     <>
       <section
-        className="bg-linear-to-br from-about-start via-about-middle to-about-end py-16 sm:py-20 lg:py-24"
+        className="overflow-x-clip bg-linear-to-br from-about-start via-about-middle to-about-end py-16 sm:py-20 lg:py-24"
         id="about"
       >
         <Container className="grid items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(340px,0.9fr)] md:gap-14 lg:gap-24">
           <Reveal>
-            <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary uppercase">
+            <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
               <Pill aria-hidden="true" className="size-4" />
               {about.eyebrow.replace("{name}", siteConfig.name)}
             </span>

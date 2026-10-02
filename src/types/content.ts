@@ -81,6 +81,7 @@ export interface SiteContent {
     productSingular: string
     productPlural: string
     searchableProducts: string
+    tableRegionLabel: string
     tableHeadings: {
       product: string
       ingredient: string

@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     background_color: "#f2f7fd",
-    theme_color: "#246dd1",
+    theme_color: "#1f5fb5",
     icons: [
       {
         src: "/icons/pct-192.png",

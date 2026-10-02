@@ -144,7 +144,7 @@ export function SiteHeader() {
               <span>{siteContent.ui.chatAction}</span>
               <ArrowUpRight aria-hidden="true" className="hidden sm:block" />
             </ButtonLink>
-            <ThemeToggle className="size-9 border border-border text-ink-soft hover:text-primary md:size-10 dark:text-foreground" />
+            <ThemeToggle className="size-9 border border-border text-ink-soft hover:text-primary-text md:size-10 dark:text-foreground" />
           </div>
 
           <nav

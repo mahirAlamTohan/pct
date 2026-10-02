@@ -119,3 +119,7 @@ Desktop.ini
 .docker
 *.tar
 *.gz
+
+# Detailed k6 load-test reports (generated per run; never commit results).
+/k6-load-test-summary-*.json
+/k6-load-test-summary-*.txt

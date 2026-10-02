@@ -20,7 +20,7 @@ export function FAQSection() {
     >
       <Container className="grid items-start gap-8 md:grid-cols-[minmax(250px,0.82fr)_minmax(0,1.4fr)] md:gap-12 lg:gap-24">
         <Reveal className="md:sticky md:top-36">
-          <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary uppercase">
+          <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
             <CircleHelp aria-hidden="true" className="size-4" />
             {faq.eyebrow}
           </span>
@@ -53,7 +53,7 @@ export function FAQSection() {
                 key={item.question}
                 value={`faq-${index.toString()}`}
               >
-                <AccordionTrigger className="py-4 text-left hover:text-primary sm:py-[1.15rem]">
+                <AccordionTrigger className="py-4 text-left hover:text-primary-text sm:py-[1.15rem]">
                   {item.question}
                 </AccordionTrigger>
                 <AccordionContent className="pr-3 text-sm leading-7 text-muted-foreground">

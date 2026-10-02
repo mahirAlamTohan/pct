@@ -26,7 +26,7 @@ export function Brand({ className, footer = false }: BrandProps) {
           "grid size-11 shrink-0 place-items-center rounded-[14px] border shadow-sm transition-transform duration-300 group-hover:-rotate-3",
           footer
             ? "border-footer-border bg-footer-card text-footer-accent"
-            : "border-blue-200/80 bg-linear-to-br from-blue-50 to-blue-100 text-primary shadow-blue-950/5 dark:border-blue-900 dark:from-blue-950 dark:to-slate-900 dark:text-blue-300"
+            : "border-blue-200/80 bg-linear-to-br from-blue-50 to-blue-100 text-primary-text shadow-blue-950/5 dark:border-blue-900 dark:from-blue-950 dark:to-slate-900 dark:text-blue-300"
         )}
       >
         <Pill size={21} strokeWidth={2.2} />

@@ -331,7 +331,7 @@ function FacetOptionGroup({
     <fieldset className="min-w-0 space-y-2.5">
       <legend className="flex w-full items-center justify-between gap-2 text-xs font-extrabold text-ink-soft dark:text-foreground">
         <span>{label}</span>
-        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.62rem] font-bold text-primary">
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.62rem] font-bold text-primary-text">
           {formatMessage(copy.selectedCount, {
             count: selections.size.toLocaleString(),
           })}
@@ -339,7 +339,10 @@ function FacetOptionGroup({
       </legend>
 
       <label className="flex min-h-10 items-center gap-2 rounded-lg border border-input bg-background px-3 text-muted-foreground shadow-sm transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/10">
-        <Search aria-hidden="true" className="size-4 shrink-0 text-primary" />
+        <Search
+          aria-hidden="true"
+          className="size-4 shrink-0 text-primary-text"
+        />
         <span className="sr-only">
           {formatMessage(copy.facetSearchAriaLabel, { label })}
         </span>
@@ -429,7 +432,7 @@ function SelectionSummary({
             aria-hidden="true"
             className={cn(
               "size-4",
-              mode === "include" ? "text-primary" : "text-violet-500"
+              mode === "include" ? "text-primary-text" : "text-violet-500"
             )}
           />
           {title}
@@ -449,7 +452,7 @@ function SelectionSummary({
               className={cn(
                 "h-auto min-h-8 max-w-full justify-between gap-1.5 rounded-lg px-2.5 py-1 text-left text-[0.65rem] font-bold transition-colors",
                 mode === "include"
-                  ? "border-primary/25 bg-primary/10 text-primary hover:border-primary/45 hover:bg-primary/15 hover:text-primary"
+                  ? "border-primary/25 bg-primary/10 text-primary-text hover:border-primary/45 hover:bg-primary/15 hover:text-primary-text"
                   : "border-violet-500/25 bg-violet-500/10 text-violet-800 hover:border-violet-500/45 hover:bg-violet-500/15 hover:text-violet-900 dark:text-violet-200 dark:hover:text-violet-100"
               )}
               key={item.key}
@@ -885,7 +888,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
     >
       <Container>
         <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-9">
-          <span className="inline-flex items-center justify-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary uppercase">
+          <span className="inline-flex items-center justify-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
             <span
               aria-hidden="true"
               className="size-1.5 rounded-[2px] bg-blue-500 shadow-[0_0_0_4px_#e3efff]"
@@ -1110,7 +1113,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
                             {copy.priceLimitHelp}
                           </p>
                         </div>
-                        <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-extrabold text-primary tabular-nums">
+                        <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-extrabold text-primary-text tabular-nums">
                           {formatPrice(priceRange[0])} –{" "}
                           {formatPrice(priceRange[1])}
                         </span>
@@ -1210,7 +1213,12 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
           )}
 
           {pageEntries.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div
+              aria-label={copy.tableRegionLabel}
+              className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              role="region"
+              tabIndex={0}
+            >
               <table className="w-full min-w-245 border-collapse text-left">
                 <thead className="bg-slate-50 dark:bg-slate-900/70">
                   <tr className="border-y border-border">

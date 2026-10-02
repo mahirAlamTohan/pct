@@ -42,14 +42,29 @@ export function runPackageManager(args, options = {}) {
     })
   }
 
-  if (process.platform === "win32" && packageManagerName !== "bun") {
-    throw new Error(
-      "Run this test script through `npm run` or `pnpm run` so it can invoke the package-manager JavaScript entry without a Windows shell."
-    )
+  const entryExtension = path.extname(packageManagerEntry ?? "").toLowerCase()
+  if (
+    process.platform === "win32" &&
+    packageManagerEntry &&
+    [".exe", ".com"].includes(entryExtension)
+  ) {
+    return spawnSync(packageManagerEntry, args, {
+      ...options,
+      shell: false,
+    })
   }
 
-  return spawnSync(packageManagerName, args, {
+  const fallbackResult = spawnSync(packageManagerName, args, {
     ...options,
     shell: false,
   })
+  if (!fallbackResult.error) return fallbackResult
+
+  if (process.platform === "win32" && packageManagerName !== "bun") {
+    throw new Error(
+      `Cannot invoke ${packageManagerName} without a Windows shell: npm_execpath=${packageManagerEntry || "<missing>"}; npm_config_user_agent=${process.env.npm_config_user_agent || "<missing>"}; direct executable error=${fallbackResult.error.message}. Use a Node JavaScript entry or a native package-manager executable on PATH.`
+    )
+  }
+
+  return fallbackResult
 }

@@ -49,7 +49,7 @@ export function HeroSection() {
             initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-3.5 py-2 text-[0.62rem] font-extrabold tracking-widest text-primary shadow-sm backdrop-blur-xl sm:text-[0.68rem]">
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-3.5 py-2 text-[0.62rem] font-extrabold tracking-widest text-primary-text shadow-sm backdrop-blur-xl sm:text-[0.68rem]">
               <ShieldCheck aria-hidden="true" className="size-4 shrink-0" />
               {content.eyebrow} {siteConfig.founded}
             </span>
@@ -116,7 +116,7 @@ export function HeroSection() {
       <Container className="relative z-10 -mt-8">
         <Card className="flex flex-col items-start justify-between gap-4 border-blue-100/80 bg-white/90 p-4 shadow-xl shadow-blue-950/10 backdrop-blur-xl sm:flex-row sm:items-center sm:p-5 dark:border-blue-900/70 dark:bg-card/90">
           <div className="flex flex-col gap-1">
-            <span className="text-[0.58rem] font-extrabold tracking-widest text-primary uppercase">
+            <span className="text-[0.58rem] font-extrabold tracking-widest text-primary-text uppercase">
               {content.contactEyebrow}
             </span>
             <p className="m-0 text-xs font-semibold text-ink-soft sm:text-sm dark:text-foreground">
@@ -135,7 +135,7 @@ export function HeroSection() {
               {content.whatsappAction}
             </ButtonLink>
             <ButtonLink
-              className="min-h-9 border border-border bg-background px-3 text-ink-soft hover:border-blue-200 hover:bg-blue-50 hover:text-primary dark:bg-slate-900 dark:text-foreground dark:hover:bg-blue-950"
+              className="min-h-9 border border-border bg-background px-3 text-ink-soft hover:border-blue-200 hover:bg-blue-50 hover:text-primary-text dark:bg-slate-900 dark:text-foreground dark:hover:bg-blue-950"
               href={siteConfig.contact.emailHref}
               size="sm"
               variant="outline"

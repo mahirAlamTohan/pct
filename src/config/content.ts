@@ -88,6 +88,7 @@ export const siteContent = {
     productSingular: "product",
     productPlural: "products",
     searchableProducts: "searchable products",
+    tableRegionLabel: "Scrollable product catalog table",
     tableHeadings: {
       product: "Product Name",
       ingredient: "Active Ingredient",

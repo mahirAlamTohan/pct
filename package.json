@@ -15,20 +15,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,css,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --write"
-    ]
-  },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "class-variance-authority": "^0.7.1",
@@ -43,8 +29,6 @@
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.2.2",
-    "@commitlint/config-conventional": "^21.2.2",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.0",
     "@eslint-react/eslint-plugin": "^5.19.0",
     "@eslint/eslintrc": "^3.3.7",
@@ -54,8 +38,6 @@
     "@types/node": "^20.19.43",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "commitizen": "^4.3.2",
-    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^10.10.0",
     "eslint-config-next": "16.2.6",
     "eslint-config-prettier": "^10.1.8",
@@ -67,8 +49,6 @@
     "eslint-plugin-regexp": "^3.3.0",
     "eslint-plugin-security": "^4.0.1",
     "eslint-plugin-tailwindcss": "^4.4.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.5.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "standard-version": "^9.5.0",

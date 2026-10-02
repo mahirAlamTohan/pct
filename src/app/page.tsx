@@ -10,7 +10,7 @@ export default function HomePage() {
     <main>
       <HeroSection />
       <CatalogExplorer catalogDataUrl={siteConfig.catalog.dataUrl} />
-      <FAQSection />
+      <FAQSection /> 
       <AboutContactSection />
       <FloatingActions />
     </main>

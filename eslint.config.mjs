@@ -146,6 +146,20 @@ export default defineConfig([
     },
   },
 
+  // Service workers run in a Web Worker global scope and are plain JavaScript.
+  {
+    ...tseslint.configs.disableTypeChecked,
+    files: ["public/sw.js"],
+    languageOptions: {
+      ...tseslint.configs.disableTypeChecked.languageOptions,
+      globals: globals.serviceworker,
+    },
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      "@eslint-react/no-leaked-conditional-rendering": "off",
+    },
+  },
+
   // CJS/CTS files
   {
     files: ["**/*.cjs", "**/*.cts"],

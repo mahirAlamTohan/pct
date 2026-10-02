@@ -29,8 +29,7 @@ export function HeroSection() {
     >
       <div className="relative isolate h-[clamp(510px,72svh,610px)] min-h-125 w-full overflow-hidden bg-hero-image-surface md:h-[clamp(500px,68svh,650px)]">
         <Image
-          alt=""
-          aria-hidden="true"
+          alt={content.imageAlt}
           className="dark:saturate-0.82 object-cover object-[68%_center] md:object-[center_52%] dark:brightness-[0.64]"
           fetchPriority="high"
           fill

@@ -19,6 +19,7 @@ export interface SiteContent {
     emailUsAction: string
     closeContactOptionsLabel: string
     contactOptionsLabel: string
+    offlineNotice: string
   }
   hero: {
     eyebrow: string
@@ -28,6 +29,7 @@ export interface SiteContent {
     proofPrimary: string
     proofSecondary: string
     imageBadge: string
+    imageAlt: string
     contactEyebrow: string
     contactDescription: string
     primaryAction: string

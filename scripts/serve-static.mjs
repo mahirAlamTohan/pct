@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createReadStream } from "node:fs"
-import { stat } from "node:fs/promises"
+import { readFile, stat } from "node:fs/promises"
 import { createServer } from "node:http"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
@@ -40,10 +40,63 @@ const contentTypes = new Map([
   [".png", "image/png"],
   [".svg", "image/svg+xml"],
   [".txt", "text/plain; charset=utf-8"],
+  [".webmanifest", "application/manifest+json; charset=utf-8"],
   [".webp", "image/webp"],
   [".woff", "font/woff"],
   [".woff2", "font/woff2"],
 ])
+
+function escapeRegularExpression(value) {
+  return value.replaceAll(".", "\\.")
+}
+
+async function loadHeaderRules() {
+  let contents
+  try {
+    contents = await readFile(path.join(rootDirectory, "_headers"), "utf8")
+  } catch {
+    return []
+  }
+
+  const rules = []
+  let currentRule
+
+  for (const line of contents.split(/\r?\n/)) {
+    if (!line.trim() || line.trim().startsWith("#")) continue
+    if (!/^\s/.test(line)) {
+      currentRule = { pattern: line.trim(), headers: new Map() }
+      rules.push(currentRule)
+      continue
+    }
+
+    const separator = line.indexOf(":")
+    if (separator < 1 || !currentRule) continue
+    currentRule.headers.set(
+      line.slice(0, separator).trim(),
+      line.slice(separator + 1).trim()
+    )
+  }
+
+  return rules.map((rule) => ({
+    ...rule,
+    matcher: new RegExp(
+      `^${rule.pattern.split("*").map(escapeRegularExpression).join(".*")}$`
+    ),
+  }))
+}
+
+const headerRules = await loadHeaderRules()
+
+function headersFor(pathname) {
+  const headers = new Map()
+
+  for (const rule of headerRules) {
+    if (!rule.matcher.test(pathname)) continue
+    for (const [name, value] of rule.headers) headers.set(name, value)
+  }
+
+  return Object.fromEntries(headers)
+}
 
 function isInsideRoot(filePath) {
   return (
@@ -111,6 +164,7 @@ const server = createServer(async (request, response) => {
       .writeHead(404, {
         "Content-Type": "text/plain; charset=utf-8",
         "X-Content-Type-Options": "nosniff",
+        ...headersFor(pathname),
       })
       .end("Not found")
     return
@@ -130,6 +184,7 @@ const server = createServer(async (request, response) => {
       "Content-Length": fileInfo.size,
       "Content-Type": contentTypes.get(extension) ?? "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
+      ...headersFor(pathname),
     })
 
     if (request.method === "HEAD") {

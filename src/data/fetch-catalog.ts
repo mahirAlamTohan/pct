@@ -7,6 +7,7 @@ import type { CatalogDataset } from "@/types/catalog"
 
 const CATALOG_MAGIC_V1 = "PCTCAT1:"
 const CATALOG_MAGIC_V2 = "PCTCAT2:"
+const CATALOG_CACHE_NAME = "pct-catalog-data-v1"
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
@@ -61,17 +62,61 @@ function siblingArtifactUrl(catalogUrl: string, artifactName: string) {
   return url.toString()
 }
 
+async function getCachedArtifact(url: string) {
+  if (typeof caches === "undefined") return undefined
+
+  try {
+    return await caches.match(url)
+  } catch {
+    return undefined
+  }
+}
+
+async function storeCachedArtifact(url: string, response: Response) {
+  if (typeof caches === "undefined" || response.type === "opaque") return
+
+  try {
+    const cache = await caches.open(CATALOG_CACHE_NAME)
+    await cache.put(url, response.clone())
+  } catch {
+    // Quota or privacy settings may disable caching; network use still works.
+  }
+}
+
 async function fetchArtifact(
   url: string,
   signal: AbortSignal | undefined,
   label: string
 ): Promise<unknown> {
-  const response = await fetch(url, {
-    cache: "force-cache",
-    credentials: "omit",
-    mode: "cors",
-    signal,
-  })
+  let response: Response
+  let shouldCacheResponse = false
+
+  try {
+    response = await fetch(url, {
+      cache: "force-cache",
+      credentials: "omit",
+      mode: "cors",
+      signal,
+    })
+    if (!response.ok) {
+      const cachedResponse = await getCachedArtifact(url)
+      if (cachedResponse) {
+        response = cachedResponse
+      } else {
+        throw new Error(
+          `${label} request failed with status ${response.status.toString()}.`
+        )
+      }
+    } else {
+      shouldCacheResponse = true
+    }
+  } catch (error) {
+    if (signal?.aborted) throw error
+
+    const cachedResponse = await getCachedArtifact(url)
+    if (!cachedResponse) throw error
+    response = cachedResponse
+  }
 
   if (!response.ok) {
     throw new Error(
@@ -79,6 +124,7 @@ async function fetchArtifact(
     )
   }
 
+  const responseToCache = shouldCacheResponse ? response.clone() : undefined
   const responseBytes = new Uint8Array(await response.arrayBuffer())
   const magicLength = CATALOG_MAGIC_V2.length
   const responseMagic = new TextDecoder().decode(
@@ -116,11 +162,15 @@ async function fetchArtifact(
     jsonText = new TextDecoder().decode(payload)
   }
 
+  let parsed: unknown
   try {
-    return JSON.parse(jsonText) as unknown
+    parsed = JSON.parse(jsonText) as unknown
   } catch {
     throw new Error(`The ${label.toLocaleLowerCase()} file is not valid JSON.`)
   }
+
+  if (responseToCache) await storeCachedArtifact(url, responseToCache)
+  return parsed
 }
 
 export async function fetchCatalogData(

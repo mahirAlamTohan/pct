@@ -7,6 +7,7 @@ export interface NavigationItem {
 
 export interface SiteConfig {
   name: string
+  url: string
   tagline: string
   description: string
   founded: number

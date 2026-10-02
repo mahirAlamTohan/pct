@@ -16,16 +16,20 @@ export const siteContent = {
     emailUsAction: "Email Us",
     closeContactOptionsLabel: "Close contact options",
     contactOptionsLabel: "Contact options",
+    offlineNotice:
+      "You're offline. Pages and catalog data already saved on this device may still be available.",
   },
   hero: {
     eyebrow: "Trusted healthcare partner since",
     title: "Quality medicines.",
     titleAccent: "Better healthcare.",
     description:
-      "Reliable access to generic and ethical-brand medicines, backed by thoughtful service and international shipping from India.",
+      "Quality medicines support better healthcare. We provide reliable access to generic and ethical-brand products, backed by thoughtful service and international shipping from India.",
     proofPrimary: "Quality focused",
     proofSecondary: "Worldwide shipping",
     imageBadge: "Carefully sourced healthcare",
+    imageAlt:
+      "Medicine bottles, vials and tablets against a global healthcare backdrop.",
     contactEyebrow: "Here for your healthcare needs",
     contactDescription:
       "For product availability and orders, contact our team directly.",

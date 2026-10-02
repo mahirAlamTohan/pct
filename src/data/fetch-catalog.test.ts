@@ -87,6 +87,7 @@ function installFetchMock(files = buildResponseMap(), failingFile?: string) {
 }
 
 beforeEach(() => {
+  vi.unstubAllGlobals()
   siteConfig.catalog.xorKey = TEST_XOR_KEY
 })
 
@@ -124,6 +125,43 @@ describe("fetchCatalogData", () => {
         mode: "cors",
       })
     }
+  })
+
+  it("loads previously saved catalog files when the network is unavailable", async () => {
+    const cacheEntries = new Map<string, Response>()
+    const cache = {
+      put: vi.fn((input: RequestInfo | URL, response: Response) => {
+        cacheEntries.set(requestUrl(input), response.clone())
+        return Promise.resolve()
+      }),
+    }
+    const cacheStorage = {
+      open: vi.fn(() => Promise.resolve(cache)),
+      match: vi.fn((input: RequestInfo | URL) =>
+        Promise.resolve(cacheEntries.get(requestUrl(input))?.clone())
+      ),
+    }
+    vi.stubGlobal("caches", cacheStorage)
+    installFetchMock()
+
+    await fetchCatalogData(
+      `https://pct-test.example/data/catalog.${version}.dat`
+    )
+    expect(cache.put).toHaveBeenCalledTimes(3)
+
+    const offlineFetch = vi.fn(() =>
+      Promise.reject(new TypeError("Network unavailable"))
+    )
+    vi.stubGlobal("fetch", offlineFetch)
+
+    const offlineDataset = await fetchCatalogData(
+      `https://pct-test.example/data/catalog.${version}.dat`
+    )
+
+    expect(offlineDataset.products[0]?.product).toBe("ALPHA 10MG")
+    expect(offlineDataset.manufacturers).toEqual(["Acme Laboratories"])
+    expect(offlineDataset.packaging).toEqual(["1x10"])
+    expect(offlineFetch).toHaveBeenCalledTimes(3)
   })
 
   it("rejects a missing companion dictionary instead of returning partial data", async () => {

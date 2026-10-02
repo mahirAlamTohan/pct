@@ -27,6 +27,13 @@ bun run build
 - Shared light/dark colors and global foundations live in `src/styles/main.css`. Fonts are self-hosted through `next/font/local`.
 - Public site settings live in `src/config/site.ts`; FAQ and interface copy live in `src/config/content.ts`; shared types live in `src/types`.
 - `NEXT_PUBLIC_*` values are embedded in the client bundle and are visible to visitors. Do not put secrets in them.
+- Set `NEXT_PUBLIC_SITE_URL` to the canonical HTTPS origin when changing the production hostname; it is used for canonical and social metadata.
+
+## Offline and security model
+
+- In production, the service worker precaches the static app shell, fonts, icons and versioned catalog files after a successful online visit. The catalog loader also saves valid catalog responses in Cache Storage and can use them when the network fails.
+- Offline use requires one online visit while the service worker finishes installing. Browser storage can be cleared or evicted, so a locally saved copy is best-effort, not a permanent backup. `npm run build` generates the content-versioned precache list and CSP hashes; deploy the `out/` created by that command.
+- Security headers are applied through `public/_headers`. See [SECURITY.md](./SECURITY.md) for the threat model and hosting-account checklist. Offline caching reduces repeat downloads; it does not block DDoS or make the site unhackable.
 
 ## Catalog behavior
 

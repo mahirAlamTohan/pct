@@ -1,31 +1,42 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process"
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { performance } from "node:perf_hooks"
 
+import {
+  packageManagerExec,
+  packageManagerLabel,
+  packageManagerRun,
+  runPackageManager,
+} from "./package-manager.mjs"
+
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
 )
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm"
 const startedAt = new Date()
 const steps = [
   {
     name: "Generate Next.js route types",
-    args: ["exec", "--", "next", "typegen"],
+    args: packageManagerExec("next", "typegen"),
   },
-  { name: "Production static build", args: ["run", "build"] },
-  { name: "ESLint", args: ["run", "lint"] },
-  { name: "TypeScript", args: ["run", "typecheck"] },
-  { name: "Unit and component tests", args: ["test", "--", "--reporter=dot"] },
-  { name: "Chromium end-to-end tests", args: ["run", "test:e2e"] },
+  { name: "Production static build", args: packageManagerRun("build") },
+  { name: "ESLint", args: packageManagerRun("lint") },
+  { name: "TypeScript", args: packageManagerRun("typecheck") },
+  {
+    name: "Unit and component tests",
+    args: packageManagerExec("vitest", "run", "--reporter=dot"),
+  },
+  {
+    name: "Chromium end-to-end tests",
+    args: packageManagerRun("test:e2e"),
+  },
 ]
 
 function commandLabel(args) {
-  return `npm ${args.join(" ")}`
+  return packageManagerLabel(args)
 }
 
 function runStep(step) {
@@ -33,12 +44,16 @@ function runStep(step) {
     `\n\n${"=".repeat(76)}\n${step.name}\n$ ${commandLabel(step.args)}\n${"=".repeat(76)}\n`
   )
   const started = performance.now()
-  const result = spawnSync(npmCommand, step.args, {
-    cwd: projectRoot,
-    env: process.env,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  })
+  let result
+  try {
+    result = runPackageManager(step.args, {
+      cwd: projectRoot,
+      env: process.env,
+      stdio: "inherit",
+    })
+  } catch (error) {
+    result = { error, status: null, signal: null }
+  }
   const durationMs = Math.round(performance.now() - started)
   const exitCode = result.error ? 1 : (result.status ?? 1)
 
@@ -120,7 +135,7 @@ async function main() {
   console.log(`JSON:    ${path.relative(projectRoot, summary.jsonPath)}`)
   console.log("E2E HTML: playwright-report/index.html")
   console.log(
-    "The E2E run writes test-only settings to out/. Run `npm run build` again before deploying."
+    `The E2E run writes test-only settings to out/. Run \`${packageManagerLabel(packageManagerRun("build"))}\` again before deploying.`
   )
 
   if (summary.failed) process.exitCode = 1

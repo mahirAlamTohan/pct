@@ -1,29 +1,34 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { chromium } from "@playwright/test"
 
+import {
+  packageManagerExec,
+  packageManagerLabel,
+  packageManagerRun,
+  runPackageManager,
+} from "./package-manager.mjs"
+
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
 )
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm"
 const fixtureEnvironment = {
   ...process.env,
   NEXT_PUBLIC_CATALOG_DATA_URL: "/__fixtures__/catalog.a1b2c3.dat",
   NEXT_PUBLIC_CATALOG_XOR_KEY: "pct-e2e-fixture-key-not-a-secret",
 }
 
-function runNpm(args, env, label) {
+function runPackageStep(args, env, label) {
   console.log(`\n=== ${label} ===\n`)
-  const result = spawnSync(npmCommand, args, {
+  console.log(`$ ${packageManagerLabel(args)}`)
+  const result = runPackageManager(args, {
     cwd: projectRoot,
     env,
     stdio: "inherit",
-    shell: process.platform === "win32",
   })
 
   if (result.error) throw result.error
@@ -56,8 +61,8 @@ async function ensureChromium() {
   console.log(
     "Playwright Chromium is not ready. Installing the browser required by the E2E suite..."
   )
-  const installStatus = runNpm(
-    ["exec", "--", "playwright", "install", "chromium"],
+  const installStatus = runPackageStep(
+    packageManagerExec("playwright", "install", "chromium"),
     process.env,
     "Install Playwright Chromium (one-time setup)"
   )
@@ -91,8 +96,8 @@ async function main() {
 
   if (!(await ensureChromium())) return
 
-  const buildStatus = runNpm(
-    ["run", "build"],
+  const buildStatus = runPackageStep(
+    packageManagerRun("build"),
     fixtureEnvironment,
     "Build static site with isolated E2E catalog fixtures"
   )
@@ -101,8 +106,8 @@ async function main() {
     return
   }
 
-  const testStatus = runNpm(
-    ["exec", "--", "playwright", "test", ...process.argv.slice(2)],
+  const testStatus = runPackageStep(
+    packageManagerExec("playwright", "test", ...process.argv.slice(2)),
     process.env,
     "Run Chromium browser tests"
   )
@@ -118,7 +123,7 @@ async function main() {
   console.log("HTML report: playwright-report/index.html")
   console.log("JSON results: test-results/e2e-results.json")
   console.log(
-    "The generated out/ directory uses test-only catalog settings. Run `npm run build` again before deploying."
+    `The generated out/ directory uses test-only catalog settings. Run \`${packageManagerLabel(packageManagerRun("build"))}\` again before deploying.`
   )
 }
 

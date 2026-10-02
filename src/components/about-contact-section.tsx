@@ -220,14 +220,14 @@ export function AboutContactSection() {
         </Container>
       </section>
 
-      <footer className="relative border-t border-blue-200/80 bg-linear-to-br from-footer-start via-footer-middle to-footer-end text-slate-700 before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-linear-to-r before:from-blue-700 before:via-sky-500 before:to-blue-200 before:content-[''] dark:border-slate-800 dark:text-slate-300">
+      <footer className="relative border-t border-footer-border bg-linear-to-br from-footer-start via-footer-middle to-footer-end text-footer-foreground before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-linear-to-r before:from-footer-accent before:via-footer-accent/70 before:to-footer-border before:content-['']">
         <Container className="grid gap-9 py-10 sm:grid-cols-2 sm:gap-8 sm:py-12 lg:grid-cols-[minmax(250px,1.2fr)_minmax(170px,0.7fr)_minmax(260px,1fr)] lg:gap-16">
           <div className="sm:col-span-2 lg:col-span-1">
             <Brand footer />
-            <span className="mt-5 block text-xs font-extrabold text-blue-800 dark:text-blue-300">
+            <span className="mt-5 block text-xs font-extrabold text-footer-accent">
               {footer.kicker}
             </span>
-            <p className="mt-2 max-w-90 text-xs leading-6 text-slate-600 dark:text-slate-400">
+            <p className="mt-2 max-w-90 text-xs leading-6 text-footer-muted">
               {replaceSiteTokens(footer.description)}
             </p>
           </div>
@@ -236,12 +236,12 @@ export function AboutContactSection() {
             aria-label={siteContent.ui.footerNavigationLabel}
             className="flex flex-col items-start gap-2.5"
           >
-            <span className="mb-1 text-[0.68rem] font-extrabold tracking-[0.075em] text-ink-soft uppercase dark:text-slate-200">
+            <span className="mb-1 text-[0.68rem] font-extrabold tracking-[0.075em] text-footer-foreground uppercase">
               {footer.navigationHeading}
             </span>
             {siteConfig.navigation.map((item) => (
               <a
-                className="text-xs font-semibold text-slate-600 transition-colors hover:text-blue-700 dark:text-slate-400 dark:hover:text-blue-300"
+                className="text-xs font-semibold text-footer-muted transition-colors hover:text-footer-accent"
                 href={item.href}
                 key={item.href}
               >
@@ -251,50 +251,50 @@ export function AboutContactSection() {
           </nav>
 
           <div className="flex flex-col items-start gap-3">
-            <span className="mb-1 text-[0.68rem] font-extrabold tracking-[0.075em] text-ink-soft uppercase dark:text-slate-200">
+            <span className="mb-1 text-[0.68rem] font-extrabold tracking-[0.075em] text-footer-foreground uppercase">
               {footer.contactHeading}
             </span>
             <div className="flex flex-col gap-1">
-              <span className="text-[0.58rem] font-extrabold tracking-[0.09em] text-slate-500 uppercase dark:text-slate-500">
+              <span className="text-[0.58rem] font-extrabold tracking-[0.09em] text-footer-muted/70 uppercase">
                 {contact.phoneLabel}
               </span>
               <a
-                className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 transition-colors hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300"
+                className="inline-flex items-center gap-2 text-xs font-bold text-footer-foreground transition-colors hover:text-footer-accent"
                 href={siteConfig.contact.phoneHref}
               >
                 <Phone
                   aria-hidden="true"
-                  className="size-4 text-blue-700 dark:text-blue-300"
+                  className="size-4 text-footer-accent"
                 />
                 {siteConfig.contact.phone || contact.phoneFallback}
               </a>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[0.58rem] font-extrabold tracking-[0.09em] text-slate-500 uppercase dark:text-slate-500">
+              <span className="text-[0.58rem] font-extrabold tracking-[0.09em] text-footer-muted/70 uppercase">
                 {contact.emailLabel}
               </span>
               <a
-                className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 transition-colors hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300"
+                className="inline-flex items-center gap-2 text-xs font-bold text-footer-foreground transition-colors hover:text-footer-accent"
                 href={siteConfig.contact.emailHref}
               >
                 <Mail
                   aria-hidden="true"
-                  className="size-4 text-blue-700 dark:text-blue-300"
+                  className="size-4 text-footer-accent"
                 />
                 {siteConfig.contact.email || contact.emailFallback}
               </a>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[0.58rem] font-extrabold tracking-[0.09em] text-slate-500 uppercase dark:text-slate-500">
+              <span className="text-[0.58rem] font-extrabold tracking-[0.09em] text-footer-muted/70 uppercase">
                 {contact.supportHoursLabel}
               </span>
-              <strong className="text-[0.7rem] font-semibold text-slate-700 dark:text-slate-300">
+              <strong className="text-[0.7rem] font-semibold text-footer-foreground">
                 {siteConfig.contact.supportHours ||
                   contact.supportHoursFallback}
               </strong>
             </div>
             <a
-              className="inline-flex items-center gap-2 text-[0.7rem] font-extrabold text-blue-800 transition-colors hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200"
+              className="inline-flex items-center gap-2 text-[0.7rem] font-extrabold text-footer-accent transition-colors hover:text-footer-foreground"
               href={siteConfig.contact.whatsappHref}
               rel="noreferrer"
               target="_blank"
@@ -306,19 +306,19 @@ export function AboutContactSection() {
           </div>
         </Container>
 
-        <Container className="grid gap-5 border-y border-blue-200/80 py-5 sm:grid-cols-3 sm:gap-4 dark:border-slate-800">
+        <Container className="grid gap-5 border-y border-footer-border py-5 sm:grid-cols-3 sm:gap-4">
           {footer.serviceItems.map((item, index) => {
             const Icon = serviceIcons.at(index) ?? ShieldCheck
             return (
               <div className="flex items-center gap-3" key={item.title}>
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-blue-200/80 bg-white text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-blue-300">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-footer-border bg-footer-card text-footer-accent">
                   <Icon aria-hidden="true" className="size-[17px]" />
                 </span>
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <strong className="text-[0.7rem] font-extrabold text-slate-800 dark:text-slate-200">
+                  <strong className="text-[0.7rem] font-extrabold text-footer-foreground">
                     {item.title}
                   </strong>
-                  <small className="text-[0.62rem] leading-5 text-slate-600 dark:text-slate-400">
+                  <small className="text-[0.62rem] leading-5 text-footer-muted">
                     {item.description}
                   </small>
                 </span>
@@ -327,21 +327,21 @@ export function AboutContactSection() {
           })}
         </Container>
 
-        <Container className="mt-5 grid gap-2 rounded-xl border border-l-[3px] border-blue-200/80 border-l-blue-400 bg-white/60 px-4 py-3 sm:grid-cols-[130px_minmax(0,1fr)] sm:gap-4 dark:border-slate-700 dark:border-l-blue-500 dark:bg-slate-900/45">
-          <strong className="text-[0.62rem] font-extrabold tracking-[0.07em] text-blue-900 uppercase dark:text-blue-200">
+        <Container className="mt-5 grid gap-2 rounded-xl border border-l-[3px] border-footer-border border-l-footer-accent bg-footer-card/70 px-4 py-3 sm:grid-cols-[130px_minmax(0,1fr)] sm:gap-4">
+          <strong className="text-[0.62rem] font-extrabold tracking-[0.07em] text-footer-accent uppercase">
             {footer.noticeHeading}
           </strong>
-          <p className="m-0 text-[0.62rem] leading-5 text-slate-600 dark:text-slate-400">
+          <p className="m-0 text-[0.62rem] leading-5 text-footer-muted">
             {footer.notice}
           </p>
         </Container>
 
-        <Container className="mt-5 flex min-h-[54px] flex-col items-start justify-center gap-1.5 border-t border-blue-200/80 text-[0.62rem] text-slate-600 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:text-slate-400">
+        <Container className="mt-5 flex min-h-[54px] flex-col items-start justify-center gap-1.5 border-t border-footer-border text-[0.62rem] text-footer-muted sm:flex-row sm:items-center sm:justify-between">
           <span>
             © {siteConfig.copyrightYear} {siteConfig.name}. All rights reserved.
           </span>
           <a
-            className="font-bold text-slate-700 transition-colors hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300"
+            className="font-bold text-footer-foreground transition-colors hover:text-footer-accent"
             href="#contact"
           >
             {footer.supportLink}

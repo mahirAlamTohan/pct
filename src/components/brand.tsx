@@ -22,15 +22,30 @@ export function Brand({ className, footer = false }: BrandProps) {
     >
       <span
         aria-hidden="true"
-        className="grid size-11 shrink-0 place-items-center rounded-[14px] border border-blue-200/80 bg-linear-to-br from-blue-50 to-blue-100 text-primary shadow-sm shadow-blue-950/5 transition-transform duration-300 group-hover:-rotate-3 dark:border-blue-900 dark:from-blue-950 dark:to-slate-900 dark:text-blue-300"
+        className={cn(
+          "grid size-11 shrink-0 place-items-center rounded-[14px] border shadow-sm transition-transform duration-300 group-hover:-rotate-3",
+          footer
+            ? "border-footer-border bg-footer-card text-footer-accent"
+            : "border-blue-200/80 bg-linear-to-br from-blue-50 to-blue-100 text-primary shadow-blue-950/5 dark:border-blue-900 dark:from-blue-950 dark:to-slate-900 dark:text-blue-300"
+        )}
       >
         <Pill size={21} strokeWidth={2.2} />
       </span>
       <span className="flex min-w-0 flex-col leading-none">
-        <span className="font-display text-xl font-extrabold tracking-[-0.055em] text-ink dark:text-foreground">
+        <span
+          className={cn(
+            "font-display text-xl font-extrabold tracking-[-0.055em]",
+            footer ? "text-footer-foreground" : "text-ink dark:text-foreground"
+          )}
+        >
           {siteConfig.name}
         </span>
-        <span className="mt-1.5 text-[0.48rem] font-bold tracking-[0.11em] whitespace-nowrap text-muted-foreground sm:text-[0.52rem]">
+        <span
+          className={cn(
+            "mt-1.5 text-[0.48rem] font-bold tracking-[0.11em] whitespace-nowrap sm:text-[0.52rem]",
+            footer ? "text-footer-muted" : "text-muted-foreground"
+          )}
+        >
           {siteContent.ui.brandCaption}
         </span>
       </span>

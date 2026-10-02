@@ -45,10 +45,12 @@ NEXT_PUBLIC_CATALOG_PDF_URL=https://pct247.ru/products.pdf
 ## Site features
 
 - Full-bleed, responsive healthcare hero with an optimized WebP visual and live HTML headline text
-- Floating header that stays visible while scrolling, smooth anchor navigation and reduced-motion-aware motion
+- Floating header that stays visible while scrolling with spring-driven width and position transitions, smooth anchor navigation and reduced-motion support
+- Floating WhatsApp chat and animated Contact Us panel with call, email and contact-section actions
 - Persistent light/dark mode and an accessible Base UI FAQ accordion
 - Fuzzy, prefix-enabled browser search with highlighting, manufacturer display, pagination and derived serial numbers
-- Price-range filters plus multi-select Manufacturer and Packaging filters, each with Include and Exclude modes
+- Metadata-driven USD price-range slider with a safe $0–$1,000 fallback when catalog price metadata is missing or invalid
+- Manufacturer and Packaging filter pills cycle through Include → Exclude → clear, with one shared summary for included and excluded values
 - Compact catalog artifact with deduplicated manufacturer and packaging dictionaries
 - Catalog product rows contain only `Product Name`, `Active Ingredient`, `Manufacturer`, `Packaging` and `RATE (USD)`; blank dictionary references are `null` and populated references are zero-based indexes
 - Optional CDN catalog loading with preview, loading and error states
@@ -63,6 +65,10 @@ The decoded JSON has this structure:
 
 ```json
 {
+  "metadata": {
+    "minPrice": 1.25,
+    "maxPrice": 12.5
+  },
   "manufacturers": ["Example Laboratories"],
   "packaging": ["1X10"],
   "products": [

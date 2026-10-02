@@ -81,12 +81,26 @@ export function SiteHeader() {
 
       <div className="h-25 md:h-[83px]" aria-hidden="true" />
 
-      <header
+      <motion.header
+        animate={{
+          borderRadius: isFloating ? 18 : 0,
+          left: isFloating ? "50%" : "0%",
+          maxWidth: isFloating ? "75rem" : "100vw",
+          top: isFloating ? 10 : 37,
+          width: isFloating ? "calc(100% - 2rem)" : "100%",
+          x: isFloating ? "-50%" : "0%",
+        }}
         className={cn(
-          "fixed top-[37px] left-0 z-50 w-full max-w-[100vw] border border-transparent bg-white/95 shadow-header-rest backdrop-blur-2xl transition-[left,width,max-width,top,translate,border-radius,border-color,background-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] dark:bg-background/95",
+          "fixed top-[37px] left-0 z-50 w-screen max-w-[100vw] border border-transparent bg-white/95 shadow-header-rest backdrop-blur-2xl transition-[border-color,background-color,box-shadow] duration-300 dark:bg-background/95",
           isFloating &&
-            "top-[10px] left-1/2 w-[calc(100vw-2rem)] max-w-300 -translate-x-1/2 rounded-2xl border-blue-200/80 bg-white/90 shadow-header-floating dark:border-blue-900/80 dark:bg-slate-950/90"
+            "border-blue-200/80 bg-white/90 shadow-header-floating dark:border-blue-900/80 dark:bg-slate-950/90"
         )}
+        initial={false}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0.01 }
+            : { type: "spring", stiffness: 175, damping: 27, mass: 0.78 }
+        }
       >
         <Container
           className={cn(
@@ -148,7 +162,7 @@ export function SiteHeader() {
             ))}
           </nav>
         </Container>
-      </header>
+      </motion.header>
     </>
   )
 }

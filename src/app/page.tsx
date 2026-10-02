@@ -1,21 +1,18 @@
-import { Button } from "@/components/ui/button"
+import { AboutContactSection } from "@/components/about-contact-section"
+import { CatalogExplorer } from "@/components/catalog-explorer"
+import { FAQSection } from "@/components/faq-section"
+import { FloatingActions } from "@/components/floating-actions"
+import { HeroSection } from "@/components/hero-section"
+import { siteConfig } from "@/config/site"
 
-export default function MainPage() {
+export default function HomePage() {
   return (
     <main>
-      <div className="flex p-6">
-        <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-          <div>
-            <h1 className="font-medium">Project ready!</h1>
-            <p>You may now add components and start building.</p>
-            <p>We&apos;ve already added the button component for you.</p>
-            <Button className="mt-2">Button</Button>
-          </div>
-          <div className="font-mono text-xs text-muted-foreground">
-            (Press <kbd>d</kbd> to toggle dark mode)
-          </div>
-        </div>
-      </div>
+      <HeroSection />
+      <CatalogExplorer catalogDataUrl={siteConfig.catalog.dataUrl} />
+      <FAQSection />
+      <AboutContactSection />
+      <FloatingActions />
     </main>
   )
 }

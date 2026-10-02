@@ -1,4 +1,6 @@
-# dependencies
+# ==========================================
+# Dependencies & Package Managers
+# ==========================================
 /node_modules
 /.pnp
 .pnp.*
@@ -6,31 +8,119 @@
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
+!.yarn/sdks
 !.yarn/versions
 
-# testing
-/coverage
+# Lockfiles (Uncomment ONLY if you explicitly want to ignore them)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+bun.lock
+bun.lockb
 
-# next.js
-/.next/
-/out/
-
-# production
+# ==========================================
+# Build & Output Framework Targets
+# ==========================================
 /build
+/dist
+/out
+# Raw source catalogs are staged here temporarily and must never ship or be committed.
+/public/data/*.json
+/.next/
+/.nuxt/
+/.svelte-kit/
+/.astro/
+/vendor
 
-# misc
-.DS_Store
+# ==========================================
+# Caches & Generated Metadata
+# ==========================================
+/.cache
+/.parcel-cache
+/.turbo
+/.vercel
+/.netlify
+/.next/cache
+*.tsbuildinfo
+*.swp
+*.swo
+
+# ==========================================
+# Environment & Secrets
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+!.env.example
+!.env.production
+
+# Security & Keys
 *.pem
+*.key
+*.crt
+*.pfx
+*.p12
 
-# debug
+# ==========================================
+# Testing & Coverage
+# ==========================================
+/coverage
+/.nyc_output
+/cypress/videos
+/cypress/screenshots
+/playwright-report/
+/test-results/
+
+# ==========================================
+# Debug & Runtime Logs
+# ==========================================
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# ==========================================
+# IDEs & Editor Settings
+# ==========================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ==========================================
+# OS & File System Artifacts
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ==========================================
+# Containerization & Deployment Artifacts
+# ==========================================
+/extras/
+.docker
+*.tar
+*.gz
+
+# Detailed k6 load-test reports (generated per run; never commit results).
+/k6-load-test-summary-*.json
+/k6-load-test-summary-*.txt

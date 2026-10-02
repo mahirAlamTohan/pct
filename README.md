@@ -4,7 +4,7 @@ A responsive pharmaceutical catalog site built with Next.js App Router, React, T
 
 ## Development
 
-Copy the public configuration template, then install and run the app:
+Copy the public configuration template, install dependencies and start the app:
 
 ```powershell
 Copy-Item .env.example .env
@@ -23,54 +23,35 @@ bun run build
 ## UI, theme and configuration
 
 - Tailwind CSS v4 is the styling foundation. `components.json` is configured for shadcn's Base UI primitives; the project does not use Radix UI.
-- Accessible Button and Accordion primitives live in `src/components/ui`. Links that look like buttons remain native anchors for correct link semantics.
-- Shared light/dark colors, radii and elevation tokens live in the `:root` and `.dark` blocks in `src/styles/main.css`. Components use Tailwind utilities; the stylesheet is limited to tokens, global foundations and reduced-motion behavior.
-- Manrope and DM Sans are self-hosted through `next/font/local` in `src/app/layout.tsx`; there are no external Google Fonts links or build-time font network requests. Their OFL licenses are included alongside the WOFF2 files in `src/fonts`.
-- Environment-backed site/business settings live in `src/config/site.ts`; FAQ and page copy live in `src/config/content.ts`. Shared data and content types live in `src/types`.
-- Set public site values in `.env` and in the deployment environment. `NEXT_PUBLIC_*` values are embedded in the static JavaScript bundle, so they are visible to visitors and require a rebuild after changes.
+- Accessible shared controls live in `src/components/ui`; links that look like buttons remain native anchors.
+- Shared light/dark colors and global foundations live in `src/styles/main.css`. Fonts are self-hosted through `next/font/local`.
+- Public site settings live in `src/config/site.ts`; FAQ and interface copy live in `src/config/content.ts`; shared types live in `src/types`.
+- `NEXT_PUBLIC_*` values are embedded in the client bundle and are visible to visitors. Do not put secrets in them.
 
-Example public contact settings:
+## Catalog behavior
 
-```dotenv
-NEXT_PUBLIC_SITE_NAME=PCT24X7
-NEXT_PUBLIC_CONTACT_PHONE=+91 8766267499
-NEXT_PUBLIC_WHATSAPP_NUMBER=918766267499
-NEXT_PUBLIC_CONTACT_EMAIL=shop@pct24x7.store
-NEXT_PUBLIC_SUPPORT_HOURS=Monday – Saturday · 9:00 AM – 8:00 PM IST
-NEXT_PUBLIC_CATALOG_PDF_URL=https://pct247.ru/products.pdf
+- There is no bundled/demo catalog. If `NEXT_PUBLIC_CATALOG_DATA_URL` is empty, points to a missing file, or its companion files cannot be fetched, the UI shows a no-records state instead of sample products.
+- Search uses MiniSearch with fuzzy/prefix matching and highlights. Filtering has independent manufacturer and packaging searches; selecting one facet never hides the values of the other.
+- Manufacturers are rendered as a virtualized, one-per-row list. Packaging remains in a compact pill list. Include and Exclude summaries sit below both groups; clicking a summary pill removes that selection.
+- Search and slider filtering are deferred while typing/dragging, product prices are parsed once per catalog load, and the table remains paginated.
+- The dual-ended USD price slider reads catalog metadata and falls back to $0–$1,000 if metadata is missing or invalid.
+
+## Build versioned catalog files
+
+`scripts/build-catalog.mjs` normalizes the source list and writes three separate, same-version artifacts to the output folder:
+
+```text
+catalog.a1b2c3.dat
+manufacturers.a1b2c3.dat
+packaging.a1b2c3.dat
 ```
 
-`NEXT_PUBLIC_WHATSAPP_NUMBER` should contain digits only, including the country code. The contact details are intentionally public; do not put secrets in `NEXT_PUBLIC_*` variables.
-
-## Site features
-
-- Full-bleed, responsive healthcare hero with an optimized WebP visual and live HTML headline text
-- Floating header that stays visible while scrolling with spring-driven width and position transitions, smooth anchor navigation and reduced-motion support
-- Floating WhatsApp chat and animated Contact Us panel with call, email and contact-section actions
-- Persistent light/dark mode and an accessible Base UI FAQ accordion
-- Fuzzy, prefix-enabled browser search with highlighting, manufacturer display, pagination and derived serial numbers
-- Metadata-driven USD price-range slider with a safe $0–$1,000 fallback when catalog price metadata is missing or invalid
-- Manufacturer and Packaging filter pills cycle through Include → Exclude → clear, with one shared summary for included and excluded values
-- Compact catalog artifact with deduplicated manufacturer and packaging dictionaries
-- Catalog product rows contain only `Product Name`, `Active Ingredient`, `Manufacturer`, `Packaging` and `RATE (USD)`; blank dictionary references are `null` and populated references are zero-based indexes
-- Optional CDN catalog loading with preview, loading and error states
-
-The checked-in catalog remains a **195-row preview** until the full sheet is processed and its generated artifact is deployed. The raw source JSON should be temporary; generated `.dat` artifacts are ignored by default.
-
-## Build a versioned catalog artifact
-
-`scripts/build-catalog.mjs` accepts the JSON source and an output directory as absolute paths. It normalizes each valid record to the five requested fields, removes S. No. and all other columns, deduplicates Manufacturer and Packaging into separate arrays, compresses the compact JSON with gzip, XOR-obfuscates the compressed bytes, and writes a randomly versioned artifact such as `catalog.a1b2c3.dat` with the `PCTCAT2:` format marker.
-
-The decoded JSON has this structure:
+Only the catalog file contains product rows and price metadata. The manufacturer and packaging dictionaries are stored in their own files, and product rows refer to them by zero-based index. A decoded example:
 
 ```json
+// catalog.<version>.dat
 {
-  "metadata": {
-    "minPrice": 1.25,
-    "maxPrice": 12.5
-  },
-  "manufacturers": ["Example Laboratories"],
-  "packaging": ["1X10"],
+  "metadata": { "minPrice": 1.25, "maxPrice": 12.5 },
   "products": [
     {
       "Product Name": "EXAMPLE 10MG",
@@ -81,49 +62,47 @@ The decoded JSON has this structure:
     }
   ]
 }
+
+// manufacturers.<version>.dat
+{ "kind": "manufacturers", "values": ["Example Laboratories"] }
+
+// packaging.<version>.dat
+{ "kind": "packaging", "values": ["1X10"] }
 ```
 
-The indexes start at zero. Rows with no manufacturer or packaging use `null` for that field. RATE values have a leading `$` removed; the full active-ingredient string is retained in the file and truncated only in the table display. At runtime, the client resolves dictionary indexes before it builds MiniSearch or applies filters.
+Each `.dat` file has the `PCTCAT2:` marker and contains gzip-compressed, XOR-obfuscated JSON. XOR is obfuscation, not encryption; the key is included in the public browser bundle and must not be treated as a secret.
 
-Set `NEXT_PUBLIC_CATALOG_XOR_KEY` in `.env` before running the script:
+Set a non-sensitive obfuscation key in `.env` before building the files:
 
 ```dotenv
 NEXT_PUBLIC_CATALOG_XOR_KEY=your-obfuscation-key
 ```
 
-PowerShell example (temporarily keep the source under `public/catalog-input`; write the artifact to `public/data`):
+The source JSON can stay in the git-ignored `extras/` folder. It is outside `public/`, so Next.js will not copy it into the static export. Example for the July 2026 list on Windows:
 
 ```powershell
-node .\scripts\build-catalog.mjs `
-  --input "C:\path\to\pct\public\catalog-input\Price List 1 July 2026 minified.json" `
-  --output "C:\path\to\pct\public\data"
+node .\\scripts\\build-catalog.mjs `
+  --input "F:\\pct\\extras\\Price List 1 July 2026 minified.json" `
+  --output "F:\\pct\\public\\data"
 ```
 
-`public/catalog-input` is a convenient temporary builder input. Next.js copies every file in `public` into the static export, so remove the raw JSON from `public` after generating the `.dat` and before every `next build`; leave the versioned artifact in `public/data`. The app's `src/data/catalog.ts` is only the checked-in preview.
+The output prints all three filenames and the shared random version. It also explains skipped rows: non-object rows and rows without a recognized Product Name are skipped; records with a Product Name but a blank Active Ingredient are retained. The first few skipped row numbers, reasons and source field names are printed so source-format mismatches can be diagnosed rather than hidden in a single total. Common aliases for product, ingredient, manufacturer, packaging and rate headers are supported.
 
-The script prints the random version, filename, output path, normalized row count, skipped-row count, dictionary sizes and artifact size. It supports arrays of records, common object wrappers (`products`, `data`, `rows`, `values`), and Google Sheets' header-row/values format. Rows without `Product Name` and `Active Ingredient` (or recognized aliases) are skipped and counted. Manufacturer, Packaging and RATE can be blank. The client loader also accepts legacy `PCTCAT1:` artifacts and older flat JSON catalogs during migration.
-
-The git ignore rule prevents accidental commits of generated `.dat` files. For a Git-backed Pages deployment where the artifact lives under `public/data`, add the specific output intentionally with `git add -f public/data/catalog.<version>.dat`. Or keep it outside the repo and upload it to a separate CDN/R2 bucket.
-
-## Cloudflare Pages
-
-The site is configured for a static export. Set these in `.env` locally and in Cloudflare Pages' build environment:
+Set the catalog URL to the versioned **catalog** file only. The loader derives `manufacturers.<version>.dat` and `packaging.<version>.dat` from that URL and fetches all three files from the same folder:
 
 ```dotenv
 NEXT_PUBLIC_CATALOG_DATA_URL=/data/catalog.a1b2c3.dat
 NEXT_PUBLIC_CATALOG_XOR_KEY=your-obfuscation-key
 ```
 
-For a separate CDN, use its full HTTPS asset URL instead of `/data/...`; configure CORS to allow `GET` from the Pages origin. Then build and publish `out/`:
+Keep the three companion files together and version-matched when uploading to a CDN. Configure CORS to allow `GET` from the site origin. If serving from `public/data`, Next.js copies the files to `out/data` during the static build. The generated `.dat` files and `extras/` inputs are ignored by Git by default; if you intentionally keep the artifacts in the repository, force-add all three matching files.
 
 ```bash
 bun run build
 ```
 
-If the artifact is under `public/data`, Next.js copies it to `out/data`. Cloudflare Pages reads `public/_headers` from the static export. Versioned filenames can safely use long-lived immutable caching because each update has a new URL. If you change `.env`, rebuild/redeploy Pages: `NEXT_PUBLIC_*` values are embedded in the static client bundle at build time. A stable manifest URL is an alternative if you want to switch versions without rebuilding the site.
+Serve each `.dat` as binary (`application/octet-stream`) and do not set `Content-Encoding: gzip` on the XOR-obfuscated payload. If you change `.env`, rebuild/redeploy because `NEXT_PUBLIC_*` values are embedded at build time. The loader also accepts the previous combined-dictionary catalog format for migration.
 
-The browser loader fetches the configured URL, removes the format marker, XOR-decodes with the build-time key, decompresses gzip using `DecompressionStream`, expands the compact dictionaries, and builds the MiniSearch index locally. Serve the `.dat` object as binary (`application/octet-stream`) and do not manually set `Content-Encoding: gzip` on the XOR-obfuscated file. A CDN may transparently compress the response, but the browser must return the original marker-plus-payload bytes to the loader.
+## Site content
 
-A WAF rate limit can reduce abusive request volume, but it cannot make a public static file private. Bot challenges may also interfere with browser fetches, so test them against the catalog URL. **XOR is obfuscation, not encryption:** the browser must receive the same key and visitors can recover it from the client bundle. Do not use a sensitive secret or rely on XOR for access control. Use an authenticated server-side endpoint if the data needs to be private.
-
-The `.env.example` sets `NEXT_PUBLIC_CATALOG_PDF_URL` to the PCT24X7 source PDF: <https://pct247.ru/products.pdf>. Override that value in `.env` or the Pages environment if the PDF location changes.
+Site, contact and PDF URL values are configured in `.env`; the `.env.example` includes the PCT24X7 defaults. The contact details and catalog URL are public. Keep business copy and FAQ data in `src/config/content.ts`.

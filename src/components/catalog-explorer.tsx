@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 import MiniSearch, { type SearchResult } from "minisearch"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useEffect, useMemo, useState } from "react"
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
 
 import { Button, ButtonLink } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -31,6 +31,7 @@ import { fetchCatalogData } from "@/data/fetch-catalog"
 import { cn } from "@/lib/utils"
 import type {
   CatalogExplorerProps,
+  CatalogFacetKind,
   CatalogFilterMode,
   CatalogLoadState,
   CatalogMetadata,
@@ -48,6 +49,7 @@ type CatalogSearchDocument = CatalogProduct & { id: number }
 interface CatalogEntry {
   product: CatalogProduct
   serial: number
+  price: number | null
   matches: CatalogMatch
 }
 
@@ -56,17 +58,21 @@ type FacetSelections = Record<
   Map<string, CatalogFilterMode>
 >
 
-interface FacetPillGroupProps {
-  kind: "manufacturer" | "packaging"
+interface FacetOptionGroupProps {
+  kind: CatalogFacetKind
   label: string
+  displayMode: "list" | "pills"
   options: string[]
   selections: Map<string, CatalogFilterMode>
   search: string
-  onCycle: (kind: "manufacturer" | "packaging", value: string) => void
+  onSearchChange: (value: string) => void
+  onCycle: (kind: CatalogFacetKind, value: string) => void
 }
 
 interface SelectionSummaryItem {
   key: string
+  kind: CatalogFacetKind
+  value: string
   label: string
 }
 
@@ -223,18 +229,102 @@ function cycleSelection(
   return nextSelections
 }
 
-function FacetPillGroup({
+function FacetOptionGroup({
   kind,
   label,
+  displayMode,
   options,
   selections,
   search,
+  onSearchChange,
   onCycle,
-}: FacetPillGroupProps) {
+}: FacetOptionGroupProps) {
   const copy = siteContent.catalog
-  const visibleOptions = options.filter((option) =>
-    normalize(option).includes(normalize(search.trim()))
+  const deferredSearch = useDeferredValue(search.trim())
+  const visibleOptions = useMemo(
+    () =>
+      options.filter((option) =>
+        normalize(option).includes(normalize(deferredSearch))
+      ),
+    [options, deferredSearch]
   )
+  const [scrollPosition, setScrollPosition] = useState({ query: "", top: 0 })
+  const listRef = useRef<HTMLDivElement>(null)
+  const isList = displayMode === "list"
+
+  useEffect(() => {
+    if (isList && listRef.current) {
+      listRef.current.scrollTop = 0
+    }
+  }, [deferredSearch, isList])
+  const rowHeight = 44
+  const viewportHeight = 288
+  const overscan = 5
+  const scrollTop =
+    scrollPosition.query === deferredSearch ? scrollPosition.top : 0
+  const firstVisibleIndex = isList
+    ? Math.max(0, Math.floor(scrollTop / rowHeight) - overscan)
+    : 0
+  const lastVisibleIndex = isList
+    ? Math.min(
+        visibleOptions.length,
+        Math.ceil((scrollTop + viewportHeight) / rowHeight) + overscan
+      )
+    : visibleOptions.length
+  const renderedOptions = visibleOptions.slice(
+    firstVisibleIndex,
+    lastVisibleIndex
+  )
+
+  function renderOption(option: string) {
+    const mode = selections.get(option)
+    const modeLabel =
+      mode === "include"
+        ? copy.includeSelected
+        : mode === "exclude"
+          ? copy.excludeSelected
+          : copy.unselectedLabel
+    const ModeIcon =
+      mode === "include" ? CircleCheck : mode === "exclude" ? CircleMinus : Plus
+
+    return (
+      <Button
+        aria-label={formatMessage(copy.facetCycleAriaLabel, {
+          label: `${label}: ${option}`,
+          mode: modeLabel,
+        })}
+        aria-pressed={Boolean(mode)}
+        className={cn(
+          "min-w-0 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
+          isList
+            ? "h-10 w-full justify-start rounded-lg px-3 text-xs"
+            : "h-auto min-h-9 max-w-full justify-start gap-2 rounded-full px-3 py-1.5 text-xs",
+          mode === "include" &&
+            "border-primary bg-primary text-white shadow-md shadow-primary/15 hover:border-primary hover:bg-primary/90 hover:text-white",
+          mode === "exclude" &&
+            "border-violet-500 bg-violet-600 text-white shadow-md shadow-violet-900/15 hover:border-violet-600 hover:bg-violet-700 hover:text-white",
+          !mode &&
+            "border-border bg-background text-ink-soft hover:border-primary/45 hover:bg-accent dark:text-foreground"
+        )}
+        data-selection-state={mode ?? "none"}
+        key={`${kind}-${option}`}
+        onClick={() => {
+          onCycle(kind, option)
+        }}
+        title={option}
+        type="button"
+        variant="outline"
+      >
+        <ModeIcon aria-hidden="true" className="size-3.5 shrink-0" />
+        <span className="min-w-0 truncate text-left">{option}</span>
+        {mode && (
+          <span className="ml-auto rounded-full bg-white/15 px-1.5 py-0.5 text-[0.54rem] font-extrabold tracking-wide uppercase">
+            {modeLabel}
+          </span>
+        )}
+      </Button>
+    )
+  }
 
   return (
     <fieldset className="min-w-0 space-y-2.5">
@@ -247,66 +337,66 @@ function FacetPillGroup({
         </span>
       </legend>
 
-      <div className="max-h-40 overflow-y-auto rounded-xl border border-border/80 bg-background/55 p-2">
-        {visibleOptions.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {visibleOptions.map((option) => {
-              const mode = selections.get(option)
-              const modeLabel =
-                mode === "include"
-                  ? copy.includeSelected
-                  : mode === "exclude"
-                    ? copy.excludeSelected
-                    : copy.unselectedLabel
-              const ModeIcon =
-                mode === "include"
-                  ? CircleCheck
-                  : mode === "exclude"
-                    ? CircleMinus
-                    : Plus
+      <label className="flex min-h-10 items-center gap-2 rounded-lg border border-input bg-background px-3 text-muted-foreground shadow-sm transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/10">
+        <Search aria-hidden="true" className="size-4 shrink-0 text-primary" />
+        <span className="sr-only">
+          {formatMessage(copy.facetSearchAriaLabel, { label })}
+        </span>
+        <Input
+          autoComplete="off"
+          className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:border-transparent focus-visible:ring-0"
+          onChange={(event) => {
+            const value = event.target.value
+            if (isList) {
+              setScrollPosition({ query: value.trim(), top: 0 })
+              if (listRef.current) listRef.current.scrollTop = 0
+            }
+            onSearchChange(value)
+          }}
+          placeholder={formatMessage(copy.facetSearchPlaceholder, { label })}
+          type="search"
+          value={search}
+        />
+      </label>
 
-              return (
-                <Button
-                  aria-label={formatMessage(copy.facetCycleAriaLabel, {
-                    label: `${label}: ${option}`,
-                    mode: modeLabel,
-                  })}
-                  aria-pressed={Boolean(mode)}
-                  className={cn(
-                    "h-auto min-h-9 max-w-full justify-start gap-2 rounded-full px-3 py-1.5 text-xs transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95",
-                    mode === "include" &&
-                      "border-primary bg-primary text-white shadow-md shadow-primary/15 hover:border-primary hover:bg-primary/90 hover:text-white",
-                    mode === "exclude" &&
-                      "border-violet-500 bg-violet-600 text-white shadow-md shadow-violet-900/15 hover:border-violet-600 hover:bg-violet-700 hover:text-white",
-                    !mode &&
-                      "border-border bg-background text-ink-soft hover:border-primary/45 hover:bg-accent dark:text-foreground"
-                  )}
-                  data-selection-state={mode ?? "none"}
-                  key={`${kind}-${option}`}
-                  onClick={() => {
-                    onCycle(kind, option)
-                  }}
-                  title={option}
-                  type="button"
-                  variant="outline"
-                >
-                  <ModeIcon aria-hidden="true" className="size-3.5 shrink-0" />
-                  <span className="min-w-0 truncate">{option}</span>
-                  {mode && (
-                    <span className="rounded-full bg-white/15 px-1.5 py-0.5 text-[0.54rem] font-extrabold tracking-wide uppercase">
-                      {modeLabel}
-                    </span>
-                  )}
-                </Button>
-              )
-            })}
+      {visibleOptions.length > 0 ? (
+        isList ? (
+          <div
+            className="max-h-72 overflow-y-auto rounded-xl border border-border/80 bg-background/55 p-2"
+            ref={listRef}
+            onScroll={(event) => {
+              setScrollPosition({
+                query: deferredSearch,
+                top: event.currentTarget.scrollTop,
+              })
+            }}
+          >
+            <div
+              className="flex flex-col"
+              style={{
+                paddingBottom: `${((visibleOptions.length - lastVisibleIndex) * rowHeight).toString()}px`,
+                paddingTop: `${(firstVisibleIndex * rowHeight).toString()}px`,
+              }}
+            >
+              {renderedOptions.map((option) => (
+                <div className="h-11 shrink-0 py-0.5" key={`${kind}-${option}`}>
+                  {renderOption(option)}
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          <p className="m-0 px-2 py-3 text-xs text-muted-foreground">
-            {options.length === 0 ? copy.noFacetValues : copy.noFacetMatches}
-          </p>
-        )}
-      </div>
+          <div className="max-h-40 overflow-y-auto rounded-xl border border-border/80 bg-background/55 p-2">
+            <div className="flex flex-wrap gap-2">
+              {visibleOptions.map((option) => renderOption(option))}
+            </div>
+          </div>
+        )
+      ) : (
+        <p className="m-0 rounded-xl border border-border/80 bg-background/55 px-3 py-5 text-center text-xs text-muted-foreground">
+          {options.length === 0 ? copy.noFacetValues : copy.noFacetMatches}
+        </p>
+      )}
     </fieldset>
   )
 }
@@ -316,12 +406,15 @@ function SelectionSummary({
   items,
   emptyMessage,
   mode,
+  onRemove,
 }: {
   title: string
   items: SelectionSummaryItem[]
   emptyMessage: string
   mode: CatalogFilterMode
+  onRemove: (kind: CatalogFacetKind, value: string) => void
 }) {
+  const copy = siteContent.catalog
   const Icon = mode === "include" ? CircleCheck : CircleMinus
 
   return (
@@ -345,20 +438,30 @@ function SelectionSummary({
         </span>
       </div>
       {items.length > 0 ? (
-        <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
+        <div className="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto">
           {items.map((item) => (
-            <span
+            <Button
+              aria-label={formatMessage(copy.removeFilterAriaLabel, {
+                label: item.label,
+                mode: mode === "include" ? "included" : "excluded",
+              })}
               className={cn(
-                "max-w-full truncate rounded-full border px-2.5 py-1 text-[0.65rem] font-bold",
+                "h-auto min-h-8 max-w-full justify-between gap-1.5 rounded-lg px-2.5 py-1 text-left text-[0.65rem] font-bold transition-colors",
                 mode === "include"
-                  ? "border-primary/20 bg-primary/10 text-primary"
-                  : "border-violet-500/20 bg-violet-500/10 text-violet-700 dark:text-violet-200"
+                  ? "border-primary/25 bg-primary/10 text-primary hover:border-primary/45 hover:bg-primary/15 hover:text-primary"
+                  : "border-violet-500/25 bg-violet-500/10 text-violet-800 hover:border-violet-500/45 hover:bg-violet-500/15 hover:text-violet-900 dark:text-violet-200 dark:hover:text-violet-100"
               )}
               key={item.key}
+              onClick={() => {
+                onRemove(item.kind, item.value)
+              }}
               title={item.label}
+              type="button"
+              variant="outline"
             >
-              {item.label}
-            </span>
+              <span className="truncate">{item.label}</span>
+              <X aria-hidden="true" className="size-3 shrink-0" />
+            </Button>
           ))}
         </div>
       ) : (
@@ -370,32 +473,28 @@ function SelectionSummary({
   )
 }
 
-export function CatalogExplorer({
-  products: initialProducts,
-  catalogDataUrl,
-}: CatalogExplorerProps) {
+export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
   const copy = siteContent.catalog
   const [query, setQuery] = useState("")
+  const deferredQuery = useDeferredValue(query)
   const [page, setPage] = useState(1)
-  const [products, setProducts] = useState(initialProducts)
-  const [manufacturerOptions, setManufacturerOptions] = useState(() =>
-    distinctValues(initialProducts.map(({ manufacturer }) => manufacturer))
-  )
-  const [packagingOptions, setPackagingOptions] = useState(() =>
-    distinctValues(initialProducts.map(({ packSize }) => packSize))
-  )
+  const [products, setProducts] = useState<CatalogProduct[]>([])
+  const [manufacturerOptions, setManufacturerOptions] = useState<string[]>([])
+  const [packagingOptions, setPackagingOptions] = useState<string[]>([])
   const [loadState, setLoadState] = useState<CatalogLoadState>(
-    catalogDataUrl ? "loading" : "preview"
+    catalogDataUrl ? "loading" : "unconfigured"
   )
   const [loadError, setLoadError] = useState("")
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [facetSearch, setFacetSearch] = useState("")
+  const [manufacturerSearch, setManufacturerSearch] = useState("")
+  const [packagingSearch, setPackagingSearch] = useState("")
   const [priceBounds, setPriceBounds] = useState<[number, number]>(() => [
     ...DEFAULT_PRICE_BOUNDS,
   ])
   const [priceRange, setPriceRange] = useState<[number, number]>(() => [
     ...DEFAULT_PRICE_BOUNDS,
   ])
+  const deferredPriceRange = useDeferredValue(priceRange)
   const [facetSelections, setFacetSelections] = useState<FacetSelections>(
     () => ({
       manufacturer: new Map(),
@@ -411,12 +510,6 @@ export function CatalogExplorer({
 
     fetchCatalogData(catalogDataUrl, controller.signal)
       .then((dataset) => {
-        if (dataset.products.length === 0) {
-          throw new Error(
-            "The catalog file did not contain any valid products."
-          )
-        }
-
         setProducts(dataset.products)
         setManufacturerOptions(
           dataset.manufacturers.length > 0
@@ -452,6 +545,11 @@ export function CatalogExplorer({
     }
   }, [catalogDataUrl])
 
+  const productPrices = useMemo(
+    () => products.map(({ rate }) => numericValue(rate)),
+    [products]
+  )
+
   const searchIndex = useMemo(() => {
     const index = new MiniSearch<CatalogSearchDocument>({
       fields: SEARCH_FIELDS,
@@ -476,12 +574,13 @@ export function CatalogExplorer({
   }, [products])
 
   const searchEntries = useMemo<CatalogEntry[]>(() => {
-    const searchTerm = query.trim()
+    const searchTerm = deferredQuery.trim()
 
     if (!searchTerm) {
       return products.map((product, index) => ({
         product,
         serial: index + 1,
+        price: productPrices.at(index) ?? null,
         matches: {},
       }))
     }
@@ -505,9 +604,16 @@ export function CatalogExplorer({
         }
 
         const product = products[serial - 1]
-        return [{ product, serial, matches: result.match }]
+        return [
+          {
+            product,
+            serial,
+            price: productPrices[serial - 1] ?? null,
+            matches: result.match,
+          },
+        ]
       })
-  }, [products, query, searchIndex])
+  }, [deferredQuery, products, productPrices, searchIndex])
 
   const includedManufacturers = useMemo(
     () =>
@@ -548,14 +654,18 @@ export function CatalogExplorer({
   const priceRangeActive =
     priceRange[0] > priceBounds[0] + PRICE_STEP / 2 ||
     priceRange[1] < priceBounds[1] - PRICE_STEP / 2
+  const deferredPriceRangeActive =
+    deferredPriceRange[0] > priceBounds[0] + PRICE_STEP / 2 ||
+    deferredPriceRange[1] < priceBounds[1] - PRICE_STEP / 2
 
   const filteredEntries = useMemo(
     () =>
-      searchEntries.filter(({ product }) => {
-        const price = numericValue(product.rate)
+      searchEntries.filter(({ product, price }) => {
         if (
-          priceRangeActive &&
-          (price === null || price < priceRange[0] || price > priceRange[1])
+          deferredPriceRangeActive &&
+          (price === null ||
+            price < deferredPriceRange[0] ||
+            price > deferredPriceRange[1])
         ) {
           return false
         }
@@ -580,8 +690,8 @@ export function CatalogExplorer({
       }),
     [
       searchEntries,
-      priceRange,
-      priceRangeActive,
+      deferredPriceRange,
+      deferredPriceRangeActive,
       includedManufacturers,
       excludedManufacturers,
       includedPackaging,
@@ -611,7 +721,7 @@ export function CatalogExplorer({
     setPage(1)
   }
 
-  function cycleFacet(kind: "manufacturer" | "packaging", value: string) {
+  function cycleFacet(kind: CatalogFacetKind, value: string) {
     setFacetSelections((current) => {
       if (kind === "manufacturer") {
         return {
@@ -628,18 +738,38 @@ export function CatalogExplorer({
     setPage(1)
   }
 
+  function removeFacet(kind: CatalogFacetKind, value: string) {
+    setFacetSelections((current) => {
+      if (kind === "manufacturer") {
+        const manufacturer = new Map(current.manufacturer)
+        manufacturer.delete(value)
+        return { ...current, manufacturer }
+      }
+
+      const packaging = new Map(current.packaging)
+      packaging.delete(value)
+      return { ...current, packaging }
+    })
+    setPage(1)
+  }
+
   function clearFilters() {
     setPage(1)
     setPriceRange(priceBounds)
-    setFacetSearch("")
+    setManufacturerSearch("")
+    setPackagingSearch("")
     setFacetSelections({
       manufacturer: new Map(),
       packaging: new Map(),
     })
   }
 
-  function summaryItemsFor(mode: CatalogFilterMode) {
-    const selectedValues = [
+  function summaryItemsFor(mode: CatalogFilterMode): SelectionSummaryItem[] {
+    const selectedValues: {
+      kind: CatalogFacetKind
+      label: string
+      selections: Map<string, CatalogFilterMode>
+    }[] = [
       {
         kind: "manufacturer",
         label: copy.manufacturerLabel,
@@ -657,6 +787,8 @@ export function CatalogExplorer({
         .filter(([, selectionMode]) => selectionMode === mode)
         .map(([value]) => ({
           key: `${kind}:${value}`,
+          kind,
+          value,
           label: `${label}: ${value}`,
         }))
     )
@@ -667,10 +799,8 @@ export function CatalogExplorer({
 
   const statusMessage = (() => {
     switch (loadState) {
-      case "preview":
-        return formatMessage(copy.status.preview, {
-          count: products.length.toLocaleString(),
-        })
+      case "unconfigured":
+        return copy.status.unconfigured
       case "loading":
         return copy.status.loading
       case "loaded":
@@ -678,11 +808,25 @@ export function CatalogExplorer({
           count: products.length.toLocaleString(),
         })
       case "error":
-        return formatMessage(copy.status.error, {
-          count: products.length.toLocaleString(),
-        })
+        return copy.status.error
     }
   })()
+  const emptyStateTitle =
+    loadState === "loading"
+      ? copy.status.loading
+      : loadState === "loaded" && products.length > 0
+        ? copy.emptyTitle
+        : copy.noCatalogRecordsTitle
+  const emptyStateDescription =
+    loadState === "loading"
+      ? ""
+      : loadState === "unconfigured"
+        ? copy.noCatalogConfiguredDescription
+        : loadState === "error"
+          ? copy.noCatalogUnavailableDescription
+          : products.length === 0
+            ? copy.noCatalogRecordsDescription
+            : copy.emptyDescription
 
   return (
     <section
@@ -724,14 +868,25 @@ export function CatalogExplorer({
               aria-live="polite"
               className="flex w-fit shrink-0 items-center gap-2.5 rounded-xl border border-blue-100 bg-blue-50/70 px-2.5 py-2 dark:border-border dark:bg-slate-900/70"
             >
-              <span className="grid size-9 place-items-center rounded-lg bg-white text-emerald-700 shadow-sm dark:bg-blue-950 dark:text-emerald-300">
+              <span
+                className={cn(
+                  "grid size-9 place-items-center rounded-lg bg-white shadow-sm dark:bg-blue-950",
+                  loadState === "loaded"
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : loadState === "error"
+                      ? "text-rose-700 dark:text-rose-300"
+                      : "text-muted-foreground"
+                )}
+              >
                 {loadState === "loading" ? (
                   <LoaderCircle
                     aria-hidden="true"
                     className="size-[17px] animate-spin"
                   />
-                ) : (
+                ) : loadState === "loaded" ? (
                   <CheckCircle2 aria-hidden="true" className="size-[17px]" />
+                ) : (
+                  <AlertCircle aria-hidden="true" className="size-[17px]" />
                 )}
               </span>
               <span className="flex flex-col leading-tight">
@@ -744,7 +899,9 @@ export function CatalogExplorer({
                 <small className="mt-0.5 text-[0.62rem] text-muted-foreground">
                   {loadState === "loaded"
                     ? copy.fullCatalogLabel
-                    : copy.searchNowLabel}
+                    : loadState === "loading"
+                      ? copy.searchNowLabel
+                      : copy.noCatalogRecordsTitle}
                 </small>
               </span>
             </div>
@@ -812,18 +969,20 @@ export function CatalogExplorer({
                 </Button>
               </div>
 
-              <ButtonLink
-                className="min-h-10 gap-1.5 bg-blue-50 px-3.5 text-xs text-blue-800 shadow-sm hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md dark:bg-blue-950 dark:text-blue-100 dark:hover:bg-blue-900"
-                href={siteConfig.catalog.pdfUrl || "#catalog"}
-                rel="noreferrer"
-                size="sm"
-                target="_blank"
-                variant="secondary"
-              >
-                <Download aria-hidden="true" />
-                {copy.downloadAction}
-                <ArrowUpRight aria-hidden="true" />
-              </ButtonLink>
+              {siteConfig.catalog.pdfUrl && (
+                <ButtonLink
+                  className="min-h-10 gap-1.5 bg-blue-50 px-3.5 text-xs text-blue-800 shadow-sm hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md dark:bg-blue-950 dark:text-blue-100 dark:hover:bg-blue-900"
+                  href={siteConfig.catalog.pdfUrl}
+                  rel="noreferrer"
+                  size="sm"
+                  target="_blank"
+                  variant="secondary"
+                >
+                  <Download aria-hidden="true" />
+                  {copy.downloadAction}
+                  <ArrowUpRight aria-hidden="true" />
+                </ButtonLink>
+              )}
             </div>
           </div>
 
@@ -850,116 +1009,102 @@ export function CatalogExplorer({
                   id="catalog-filters"
                   role="region"
                 >
-                  <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
-                    <div className="min-w-0 space-y-4">
-                      <label className="flex min-h-10 items-center gap-2.5 rounded-xl border border-input bg-background px-3 text-muted-foreground shadow-sm transition-[border-color,box-shadow] focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/10">
-                        <Search
-                          aria-hidden="true"
-                          className="size-4 shrink-0 text-primary"
-                        />
-                        <span className="sr-only">
-                          {copy.facetSearchAllAriaLabel}
-                        </span>
-                        <Input
-                          autoComplete="off"
-                          className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:border-transparent focus-visible:ring-0"
-                          onChange={(event) => {
-                            setFacetSearch(event.target.value)
-                          }}
-                          placeholder={copy.facetSearchAllPlaceholder}
-                          type="search"
-                          value={facetSearch}
-                        />
-                      </label>
-
-                      <div className="grid min-w-0 gap-4 md:grid-cols-2">
-                        <FacetPillGroup
-                          kind="manufacturer"
-                          label={copy.manufacturerLabel}
-                          onCycle={cycleFacet}
-                          options={manufacturerOptions}
-                          search={facetSearch}
-                          selections={facetSelections.manufacturer}
-                        />
-                        <FacetPillGroup
-                          kind="packaging"
-                          label={copy.packagingLabel}
-                          onCycle={cycleFacet}
-                          options={packagingOptions}
-                          search={facetSearch}
-                          selections={facetSelections.packaging}
-                        />
-                      </div>
+                  <div className="space-y-5">
+                    <div className="grid min-w-0 gap-5 xl:grid-cols-2">
+                      <FacetOptionGroup
+                        displayMode="list"
+                        kind="manufacturer"
+                        label={copy.manufacturerLabel}
+                        onCycle={cycleFacet}
+                        onSearchChange={setManufacturerSearch}
+                        options={manufacturerOptions}
+                        search={manufacturerSearch}
+                        selections={facetSelections.manufacturer}
+                      />
+                      <FacetOptionGroup
+                        displayMode="pills"
+                        kind="packaging"
+                        label={copy.packagingLabel}
+                        onCycle={cycleFacet}
+                        onSearchChange={setPackagingSearch}
+                        options={packagingOptions}
+                        search={packagingSearch}
+                        selections={facetSelections.packaging}
+                      />
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                    <div className="grid gap-3 md:grid-cols-2">
                       <SelectionSummary
                         emptyMessage={copy.noIncludedFilters}
                         items={includedSummary}
                         mode="include"
+                        onRemove={removeFacet}
                         title={copy.includedFiltersTitle}
                       />
                       <SelectionSummary
                         emptyMessage={copy.noExcludedFilters}
                         items={excludedSummary}
                         mode="exclude"
+                        onRemove={removeFacet}
                         title={copy.excludedFiltersTitle}
                       />
                     </div>
-                  </div>
 
-                  <section className="mt-5 rounded-2xl border border-border/80 bg-background/75 p-4 sm:p-5">
-                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h4 className="m-0 text-xs font-extrabold text-ink-soft dark:text-foreground">
-                          {copy.priceRangeTitle}
-                        </h4>
-                        <p className="m-0 mt-1 text-[0.68rem] text-muted-foreground">
-                          {copy.priceLimitHelp}
-                        </p>
+                    <section className="rounded-2xl border border-border/80 bg-background/75 p-4 sm:p-5">
+                      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h4 className="m-0 text-xs font-extrabold text-ink-soft dark:text-foreground">
+                            {copy.priceRangeTitle}
+                          </h4>
+                          <p className="m-0 mt-1 text-[0.68rem] text-muted-foreground">
+                            {copy.priceLimitHelp}
+                          </p>
+                        </div>
+                        <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-extrabold text-primary tabular-nums">
+                          {formatPrice(priceRange[0])} –{" "}
+                          {formatPrice(priceRange[1])}
+                        </span>
                       </div>
-                      <span className="rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-extrabold text-primary tabular-nums">
-                        {formatPrice(priceRange[0])} –{" "}
-                        {formatPrice(priceRange[1])}
-                      </span>
-                    </div>
-                    <RangeSlider
-                      max={priceBounds[1]}
-                      maximumLabel={copy.maximumPriceAriaLabel}
-                      min={priceBounds[0]}
-                      minimumLabel={copy.minimumPriceAriaLabel}
-                      onValueChange={(nextRange) => {
-                        setPriceRange(nextRange)
-                        setPage(1)
-                      }}
-                      step={PRICE_STEP}
-                      value={priceRange}
-                    />
-                    <div className="mt-1 flex justify-between text-[0.62rem] font-semibold text-muted-foreground tabular-nums">
-                      <span>
-                        {copy.minimumPriceLabel}: {formatPrice(priceBounds[0])}
-                      </span>
-                      <span>
-                        {copy.maximumPriceLabel}: {formatPrice(priceBounds[1])}
-                      </span>
-                    </div>
-                  </section>
+                      <RangeSlider
+                        max={priceBounds[1]}
+                        maximumLabel={copy.maximumPriceAriaLabel}
+                        min={priceBounds[0]}
+                        minimumLabel={copy.minimumPriceAriaLabel}
+                        onValueChange={(nextRange) => {
+                          setPriceRange(nextRange)
+                          setPage(1)
+                        }}
+                        step={PRICE_STEP}
+                        value={priceRange}
+                      />
+                      <div className="mt-1 flex justify-between text-[0.62rem] font-semibold text-muted-foreground tabular-nums">
+                        <span>
+                          {copy.minimumPriceLabel}:{" "}
+                          {formatPrice(priceBounds[0])}
+                        </span>
+                        <span>
+                          {copy.maximumPriceLabel}:{" "}
+                          {formatPrice(priceBounds[1])}
+                        </span>
+                      </div>
+                    </section>
 
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-3">
-                    <p
-                      aria-live="polite"
-                      className="m-0 text-xs font-semibold text-muted-foreground"
-                    >
-                      {filteredEntries.length.toLocaleString()} {"matching "}
-                      {filteredEntries.length === 1
-                        ? copy.productSingular
-                        : copy.productPlural}
-                    </p>
-                    <p className="m-0 text-[0.62rem] text-muted-foreground">
-                      {formatMessage(copy.selectedCount, {
-                        count: selectedFacetCount.toLocaleString(),
-                      })}
-                    </p>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-3">
+                      <p
+                        aria-live="polite"
+                        className="m-0 text-xs font-semibold text-muted-foreground"
+                      >
+                        {filteredEntries.length.toLocaleString()} {"matching "}
+                        {filteredEntries.length === 1
+                          ? copy.productSingular
+                          : copy.productPlural}
+                      </p>
+                      <p className="m-0 text-[0.62rem] text-muted-foreground">
+                        {formatMessage(copy.selectedCount, {
+                          count: selectedFacetCount.toLocaleString(),
+                        })}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -972,9 +1117,12 @@ export function CatalogExplorer({
           >
             <span
               className={cn(
-                "inline-flex items-center gap-2 font-semibold text-emerald-800 dark:text-emerald-300",
+                "inline-flex items-center gap-2 font-semibold",
+                loadState === "loaded" &&
+                  "text-emerald-800 dark:text-emerald-300",
                 loadState === "loading" && "text-blue-700 dark:text-blue-300",
-                loadState === "error" && "text-rose-700 dark:text-rose-300"
+                loadState === "error" && "text-rose-700 dark:text-rose-300",
+                loadState === "unconfigured" && "text-muted-foreground"
               )}
             >
               {loadState === "loading" ? (
@@ -982,17 +1130,19 @@ export function CatalogExplorer({
                   aria-hidden="true"
                   className="size-3.5 animate-spin"
                 />
-              ) : loadState === "error" ? (
-                <AlertCircle aria-hidden="true" className="size-3.5" />
-              ) : (
+              ) : loadState === "loaded" ? (
                 <span className="size-1.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/15" />
+              ) : (
+                <AlertCircle aria-hidden="true" className="size-3.5" />
               )}
               {statusMessage}
             </span>
             <span className="text-muted-foreground sm:text-right">
-              {query.trim()
-                ? `${filteredEntries.length.toLocaleString()} matching ${filteredEntries.length === 1 ? copy.productSingular : copy.productPlural}`
-                : `${filteredEntries.length.toLocaleString()} ${copy.searchableProducts}`}
+              {loadState === "unconfigured" || loadState === "error"
+                ? copy.noCatalogRecordsTitle
+                : query.trim()
+                  ? `${filteredEntries.length.toLocaleString()} matching ${filteredEntries.length === 1 ? copy.productSingular : copy.productPlural}`
+                  : `${filteredEntries.length.toLocaleString()} ${copy.searchableProducts}`}
             </span>
           </div>
 
@@ -1121,25 +1271,36 @@ export function CatalogExplorer({
               role="status"
             >
               <span className="mb-3 grid size-14 place-items-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-200">
-                <Search aria-hidden="true" className="size-6" />
+                {loadState === "loading" ? (
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="size-6 animate-spin"
+                  />
+                ) : (
+                  <Search aria-hidden="true" className="size-6" />
+                )}
               </span>
               <h4 className="m-0 font-display text-base font-extrabold text-ink-soft dark:text-foreground">
-                {copy.emptyTitle}
+                {emptyStateTitle}
               </h4>
-              <p className="mt-1 mb-4 max-w-sm text-xs leading-5 text-muted-foreground">
-                {copy.emptyDescription}
-              </p>
-              <ButtonLink
-                className="min-h-9 border-border text-xs"
-                href={siteConfig.catalog.pdfUrl || "#catalog"}
-                rel="noreferrer"
-                size="sm"
-                target="_blank"
-                variant="outline"
-              >
-                <Download aria-hidden="true" />
-                {copy.openCatalogAction}
-              </ButtonLink>
+              {emptyStateDescription && (
+                <p className="mt-1 mb-4 max-w-sm text-xs leading-5 text-muted-foreground">
+                  {emptyStateDescription}
+                </p>
+              )}
+              {siteConfig.catalog.pdfUrl && (
+                <ButtonLink
+                  className="min-h-9 border-border text-xs"
+                  href={siteConfig.catalog.pdfUrl}
+                  rel="noreferrer"
+                  size="sm"
+                  target="_blank"
+                  variant="outline"
+                >
+                  <Download aria-hidden="true" />
+                  {copy.openCatalogAction}
+                </ButtonLink>
+              )}
             </div>
           )}
 

@@ -18,11 +18,10 @@ export interface CatalogDataset {
   metadata?: CatalogMetadata
 }
 
-export type CatalogLoadState = "preview" | "loading" | "loaded" | "error"
+export type CatalogLoadState = "unconfigured" | "loading" | "loaded" | "error"
 export type CatalogFilterMode = "include" | "exclude"
 export type CatalogFacetKind = "manufacturer" | "packaging"
 
 export interface CatalogExplorerProps {
-  products: CatalogProduct[]
   catalogDataUrl?: string
 }

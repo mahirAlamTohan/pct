@@ -45,8 +45,6 @@ export interface SiteContent {
     searchLabel: string
     searchPlaceholder: string
     searchHelp: string
-    clearSearchAction: string
-    facetModeAriaLabel: string
     facetSearchAriaLabel: string
     fullCatalogLabel: string
     searchNowLabel: string
@@ -54,8 +52,6 @@ export interface SiteContent {
     paginationLabel: string
     filtersAction: string
     closeFiltersAction: string
-    facetSearchAllAriaLabel: string
-    facetSearchAllPlaceholder: string
     includedFiltersTitle: string
     excludedFiltersTitle: string
     noIncludedFilters: string
@@ -68,8 +64,6 @@ export interface SiteContent {
     maximumPriceLabel: string
     minimumPriceAriaLabel: string
     maximumPriceAriaLabel: string
-    noMinimumPrice: string
-    noMaximumPrice: string
     priceLimitHelp: string
     manufacturerLabel: string
     packagingLabel: string
@@ -94,13 +88,18 @@ export interface SiteContent {
       rate: string
     }
     status: {
-      preview: string
+      unconfigured: string
       loading: string
       loaded: string
       error: string
     }
     emptyTitle: string
     emptyDescription: string
+    noCatalogRecordsTitle: string
+    noCatalogConfiguredDescription: string
+    noCatalogRecordsDescription: string
+    noCatalogUnavailableDescription: string
+    removeFilterAriaLabel: string
     noProducts: string
     summaryShowing: string
     summaryOf: string

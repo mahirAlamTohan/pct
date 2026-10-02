@@ -117,7 +117,7 @@ export const siteContent = {
     previousPageAriaLabel: "Previous page",
     nextPageAriaLabel: "Next page",
     sourceNote:
-      "Product data and its manufacturer and packaging dictionaries are loaded from version-matched files in the configured catalog data folder.",
+      "",
   },
   faq: {
     eyebrow: "Good to know",

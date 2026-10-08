@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#246dd1" />
+    <title>Offline | PCT24X7</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+      }
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        place-items: center;
+        background: #f2f7fd;
+        color: #26364e;
+      }
+      main {
+        max-width: 34rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+      }
+      p {
+        line-height: 1.7;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #081729;
+          color: #e5eefb;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You're offline</h1>
+      <p>
+        PCT24X7 could not open this page from its saved copy. Reconnect to the
+        internet once, let the offline copy finish saving, and then try again.
+      </p>
+    </main>
+  </body>
+</html>

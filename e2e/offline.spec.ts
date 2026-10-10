@@ -110,7 +110,7 @@ test("caches successful catalog responses on-device and reloads them offline", a
   await expect(page.locator("tbody tr").first()).toContainText("ALPHA 10MG")
 })
 
-test("pre-caches the separate estimate route and restores its local cart offline", async ({
+test("keeps the estimate sidebar and its local cart available offline", async ({
   context,
   page,
 }) => {
@@ -137,16 +137,23 @@ test("pre-caches the separate estimate route and restores its local cart offline
     const manifest = (await response.json()) as { assets: string[] }
     return manifest.assets
   })
-  expect(precacheAssets).toContain("/estimate")
-  expect(precacheAssets).toContain("/estimate/")
+  expect(precacheAssets).toContain("/")
+  expect(precacheAssets).not.toContain("/estimate/")
 
   await context.setOffline(true)
-  await page.goto("/estimate")
+  await page.reload()
   await expect(
-    page.getByRole("heading", { name: "Your order estimate" })
+    page.getByText(
+      "You're offline. Pages and catalog data already saved on this device may still be available."
+    )
   ).toBeVisible()
+  await page
+    .getByRole("button", { name: "Estimate, 1 packet in your estimate" })
+    .click()
+  const drawer = page.getByRole("dialog", { name: "Your estimate" })
+  await expect(drawer).toBeVisible()
   await expect(
-    page.getByRole("complementary", { name: "Estimated total" })
+    drawer.getByRole("complementary", { name: "Estimated total" })
   ).toContainText("$1.00")
 })
 

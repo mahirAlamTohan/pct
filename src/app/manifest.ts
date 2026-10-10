@@ -47,18 +47,6 @@ export default function manifest(): MetadataRoute.Manifest {
           },
         ],
       },
-      {
-        name: "Build an order estimate",
-        short_name: "Estimate",
-        url: "/estimate/",
-        icons: [
-          {
-            src: "/icons/pct-192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-        ],
-      },
     ],
   }
 }

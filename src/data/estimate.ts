@@ -221,10 +221,11 @@ export function createEstimateSummary(
   const lines = [
     `${siteName} — order estimate (not an order)`,
     "",
-    ...items.map(
-      (item) =>
-        `${item.product}${item.packSize ? ` (${item.packSize})` : ""} — ${String(item.quantity)} × ${formatUsdCents(item.unitPriceCents)} = ${formatUsdCents(calculateLineTotalCents(item))}`
-    ),
+    ...items.map((item) => {
+      const packetLabel = item.quantity === 1 ? "packet" : "packets"
+      const packDetails = item.packSize ? ` of ${item.packSize}` : ""
+      return `${item.product} — ${String(item.quantity)} ${packetLabel}${packDetails} at ${formatUsdCents(item.unitPriceCents)} each = ${formatUsdCents(calculateLineTotalCents(item))}`
+    }),
     "",
     `Estimated total: ${formatUsdCents(calculateEstimateTotalCents(items))}`,
     "Prices are estimates and may change. No order or payment has been submitted.",

@@ -29,7 +29,7 @@ function estimateItem(product: CatalogProduct, quantity = 1) {
   return { ...item, quantity }
 }
 
-describe("client-side order estimate calculations", () => {
+describe("client-side estimate calculations", () => {
   it("parses valid USD rates to integer cents and rejects unusable values", () => {
     expect(parseUsdToCents("$ 1.25")).toBe(125)
     expect(parseUsdToCents("1,200.50")).toBe(120_050)
@@ -118,6 +118,9 @@ describe("client-side order estimate calculations", () => {
     expect(parseStoredEstimate(serialized)).toEqual([item])
     expect(createEstimateSummary([item], "PCT24X7")).toContain(
       "PCT24X7 — order estimate (not an order)"
+    )
+    expect(createEstimateSummary([item], "PCT24X7")).toContain(
+      "2 packets of 1x10 at $1.25 each = $2.50"
     )
     expect(createEstimateSummary([item], "PCT24X7")).toContain(
       "Estimated total: $2.50"

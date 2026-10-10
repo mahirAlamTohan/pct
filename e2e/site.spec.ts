@@ -497,9 +497,6 @@ test("renders the PWA manifest, icons, catalog shortcut, and rich footer", async
   expect(manifest.shortcuts).toContainEqual(
     expect.objectContaining({ url: "/#catalog" })
   )
-  expect(manifest.shortcuts).toContainEqual(
-    expect.objectContaining({ url: "/estimate/" })
-  )
   expect(manifest.icons.map(({ sizes }) => sizes)).toContain("192x192")
   expect(manifest.icons.map(({ sizes }) => sizes)).toContain("512x512")
   expect(manifest.icons).toContainEqual(

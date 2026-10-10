@@ -8,12 +8,13 @@ import {
   Phone,
 } from "lucide-react"
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react"
-import { useSyncExternalStore } from "react"
+import { useState, useSyncExternalStore } from "react"
 
 import { Brand } from "@/components/brand"
 import { useEstimateCart } from "@/components/estimate/estimate-cart-provider"
+import { EstimateCartDrawer } from "@/components/estimate/estimate-cart-drawer"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { ButtonLink } from "@/components/ui/button"
+import { Button, ButtonLink } from "@/components/ui/button"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
@@ -41,8 +42,13 @@ export function SiteHeader() {
     getServerSnapshot
   )
   const prefersReducedMotion = useReducedMotion()
-  const { itemCount } = useEstimateCart()
-  const estimateAriaLabel = `${siteContent.ui.estimateAction}, ${siteContent.ui.estimateCountLabel.replace("{count}", itemCount.toLocaleString())}`
+  const { packetCount } = useEstimateCart()
+  const [isEstimateOpen, setIsEstimateOpen] = useState(false)
+  const estimateCountLabel =
+    packetCount === 1
+      ? siteContent.ui.estimateCountSingularLabel
+      : siteContent.ui.estimateCountLabel
+  const estimateAriaLabel = `${siteContent.ui.estimateAction}, ${estimateCountLabel.replace("{count}", packetCount.toLocaleString())}`
   const { scrollYProgress } = useScroll()
   const scrollProgress = useSpring(scrollYProgress, {
     damping: 30,
@@ -142,12 +148,15 @@ export function SiteHeader() {
           </nav>
 
           <div className="col-start-2 row-start-1 flex items-center gap-1.5 md:ml-auto md:gap-2">
-            <ButtonLink
+            <Button
               aria-label={estimateAriaLabel}
               className="relative size-9 border border-border text-ink-soft hover:border-primary/40 hover:text-primary-text md:h-9 md:w-auto md:px-3"
-              href="/estimate"
+              onClick={() => {
+                setIsEstimateOpen(true)
+              }}
               size="icon"
               title={estimateAriaLabel}
+              type="button"
               variant="outline"
             >
               <Calculator aria-hidden="true" />
@@ -155,15 +164,15 @@ export function SiteHeader() {
               <span className="hidden md:inline">
                 {siteContent.ui.estimateAction}
               </span>
-              {itemCount > 0 && (
+              {packetCount > 0 && (
                 <span
                   aria-hidden="true"
                   className="absolute -top-1.5 -right-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[0.58rem] leading-5 font-extrabold text-white shadow-sm"
                 >
-                  {itemCount > 99 ? "99+" : itemCount.toString()}
+                  {packetCount > 99 ? "99+" : packetCount.toString()}
                 </span>
               )}
-            </ButtonLink>
+            </Button>
             <ButtonLink
               className="min-h-9 gap-2 bg-primary px-3 text-white shadow-md shadow-blue-900/15 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg sm:px-3.5 [&_svg]:size-3.5"
               href={siteConfig.contact.whatsappHref}
@@ -194,6 +203,10 @@ export function SiteHeader() {
           </nav>
         </Container>
       </motion.header>
+      <EstimateCartDrawer
+        onOpenChange={setIsEstimateOpen}
+        open={isEstimateOpen}
+      />
     </>
   )
 }

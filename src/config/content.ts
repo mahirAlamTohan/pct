@@ -19,7 +19,8 @@ export const siteContent = {
     offlineNotice:
       "You're offline. Pages and catalog data already saved on this device may still be available.",
     estimateAction: "Estimate",
-    estimateCountLabel: "{count} items in your estimate",
+    estimateCountLabel: "{count} packets in your estimate",
+    estimateCountSingularLabel: "{count} packet in your estimate",
   },
   hero: {
     eyebrow: "Trusted healthcare partner since",
@@ -132,34 +133,36 @@ export const siteContent = {
   },
   estimate: {
     eyebrow: "Price estimator",
-    title: "Your order estimate",
+    title: "Your estimate",
     description:
-      "Choose catalog products and quantities to see an indicative total before contacting our team.",
+      "Choose products and packet counts to see an indicative total before contacting our team.",
+    closeAction: "Close estimate sidebar",
     localOnlyNotice:
       "This estimate stays in your browser on this device. Nothing is sent or ordered here. Prices may change; contact our team to place a real order.",
     emptyTitle: "Your estimate is empty",
     emptyDescription:
-      "Add products from the catalog to calculate an estimated total.",
-    browseCatalogAction: "Browse the catalog",
-    productsHeading: "Selected products",
-    unitPriceLabel: "Unit price",
-    quantityLabel: "Quantity",
+      "Add products from the catalog, then choose how many packets of each listed pack size to estimate.",
+    continueBrowsingAction: "Continue browsing",
+    productsHeading: "Products in your estimate",
+    packLabel: "Pack",
+    packetCountLabel: "Total packets",
+    singlePacketPriceLabel: "Single packet price",
     lineTotalLabel: "Line total",
     totalLabel: "Estimated total",
     packPriceNote:
-      "Catalog rates are rounded to the nearest cent and apply to each listed pack.",
+      "The catalog rate is the single-packet price for its listed packaging, rounded to the nearest cent.",
     clearAction: "Clear estimate",
-    copyAction: "Copy estimate summary",
-    copiedMessage: "Estimate summary copied on this device.",
+    copyAction: "Copy estimate",
+    copiedMessage: "Estimate copied on this device.",
     copyFailureMessage:
       "Could not access the clipboard. You can still review the totals here.",
     loadingMessage: "Loading this device's saved estimate…",
     storageUnavailableNotice:
       "Browser storage is unavailable. This estimate will remain in memory only until you close this tab.",
     removeItemAriaLabel: "Remove {product} from your estimate",
-    decreaseQuantityAriaLabel: "Decrease quantity for {product}",
-    increaseQuantityAriaLabel: "Increase quantity for {product}",
-    setQuantityAriaLabel: "Quantity for {product}",
+    decreaseQuantityAriaLabel: "Remove one packet of {product}",
+    increaseQuantityAriaLabel: "Add one packet of {product}",
+    setQuantityAriaLabel: "Total packets of {packSize} for {product}",
   },
   faq: {
     eyebrow: "Good to know",

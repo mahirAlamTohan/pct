@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { EstimateCartProvider } from "@/components/estimate/estimate-cart-provider"
-import { EstimatePage } from "@/components/estimate/estimate-page"
+import { EstimateCartDrawer } from "@/components/estimate/estimate-cart-drawer"
 import {
   createEstimateLineItem,
   ESTIMATE_STORAGE_KEY,
@@ -35,15 +35,16 @@ const beta: CatalogProduct = {
 
 function estimateItem(product: CatalogProduct, quantity = 1) {
   const item = createEstimateLineItem(product)
-  if (!item)
+  if (!item) {
     throw new Error(`Unable to create test item for ${product.product}`)
+  }
   return { ...item, quantity }
 }
 
 function renderEstimate() {
   render(
     <EstimateCartProvider>
-      <EstimatePage />
+      <EstimateCartDrawer open onOpenChange={vi.fn()} />
     </EstimateCartProvider>
   )
 }
@@ -56,8 +57,8 @@ beforeEach(() => {
   window.localStorage.clear()
 })
 
-describe("EstimatePage", () => {
-  it("loads the device-local estimate, computes totals, and persists quantity changes", async () => {
+describe("EstimateCartDrawer", () => {
+  it("loads local products and labels packet counts and single-packet prices", async () => {
     const user = userEvent.setup()
     window.localStorage.setItem(
       ESTIMATE_STORAGE_KEY,
@@ -65,16 +66,23 @@ describe("EstimatePage", () => {
     )
     renderEstimate()
 
+    const dialog = await screen.findByRole("dialog", { name: "Your estimate" })
+    expect(dialog).toHaveTextContent("3 packets")
+    expect(screen.getByText("Total packets of 1x10")).toBeInTheDocument()
     expect(
-      await screen.findByRole("heading", { name: "Your order estimate" })
-    ).toBeInTheDocument()
+      screen.getAllByText("Single packet price", { exact: true })
+    ).toHaveLength(2)
     expect(screen.getByText("$7.00")).toBeInTheDocument()
-    expect(screen.getByText("3 items", { exact: true })).toBeInTheDocument()
 
     await user.click(
-      screen.getByRole("button", { name: "Increase quantity for BETA 20MG" })
+      screen.getByRole("button", { name: "Add one packet of BETA 20MG" })
     )
+    expect(
+      within(dialog).getByText("Total packets of 2x10")
+    ).toBeInTheDocument()
+    expect(dialog).toHaveTextContent("4 packets")
     expect(screen.getByText("$12.00")).toBeInTheDocument()
+
     await waitFor(() => {
       const stored = JSON.parse(
         window.localStorage.getItem(ESTIMATE_STORAGE_KEY) ?? "{}"
@@ -113,7 +121,7 @@ describe("EstimatePage", () => {
     ).toBeInTheDocument()
   })
 
-  it("removes products and clears the estimate without creating an order", async () => {
+  it("removes products and clears the local estimate without creating an order", async () => {
     const user = userEvent.setup()
     window.localStorage.setItem(
       ESTIMATE_STORAGE_KEY,
@@ -121,7 +129,7 @@ describe("EstimatePage", () => {
     )
     renderEstimate()
 
-    await screen.findByText("$6.00")
+    await screen.findByRole("dialog", { name: "Your estimate" })
     await user.click(
       screen.getByRole("button", {
         name: "Remove ALPHA 10MG from your estimate",
@@ -145,7 +153,7 @@ describe("EstimatePage", () => {
     ).toBeNull()
   })
 
-  it("copies a local estimate summary without submitting it", async () => {
+  it("copies a local packet estimate summary without submitting it", async () => {
     const user = userEvent.setup()
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, "clipboard", {
@@ -154,21 +162,21 @@ describe("EstimatePage", () => {
     })
     window.localStorage.setItem(
       ESTIMATE_STORAGE_KEY,
-      serializeEstimateItems([estimateItem(alpha)])
+      serializeEstimateItems([estimateItem(alpha, 2)])
     )
     renderEstimate()
 
     await user.click(
-      await screen.findByRole("button", { name: "Copy estimate summary" })
+      await screen.findByRole("button", { name: "Copy estimate" })
     )
 
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith(
-        expect.stringContaining("Estimated total: $1.00")
+        expect.stringContaining("2 packets of 1x10 at $1.00 each = $2.00")
       )
     })
     expect(
-      screen.getByText("Estimate summary copied on this device.")
+      screen.getByText("Estimate copied on this device.")
     ).toBeInTheDocument()
     expect(
       screen.queryByRole("button", { name: /place order|checkout|pay/i })

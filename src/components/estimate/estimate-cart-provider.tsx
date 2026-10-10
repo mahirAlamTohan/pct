@@ -27,7 +27,7 @@ interface EstimateStoreState {
 }
 
 interface EstimateCartContextValue extends EstimateStoreState {
-  itemCount: number
+  packetCount: number
   totalCents: bigint
   addProduct: (product: CatalogProduct) => boolean
   setQuantity: (id: string, quantity: number) => void
@@ -178,7 +178,10 @@ export function EstimateCartProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       ...state,
-      itemCount: state.items.reduce((count, item) => count + item.quantity, 0),
+      packetCount: state.items.reduce(
+        (count, item) => count + item.quantity,
+        0
+      ),
       totalCents: calculateEstimateTotalCents(state.items),
       addProduct: store.addProduct,
       setQuantity: store.setQuantity,

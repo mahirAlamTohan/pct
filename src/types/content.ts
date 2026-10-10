@@ -22,6 +22,7 @@ export interface SiteContent {
     offlineNotice: string
     estimateAction: string
     estimateCountLabel: string
+    estimateCountSingularLabel: string
   }
   hero: {
     eyebrow: string
@@ -122,13 +123,15 @@ export interface SiteContent {
     eyebrow: string
     title: string
     description: string
+    closeAction: string
     localOnlyNotice: string
     emptyTitle: string
     emptyDescription: string
-    browseCatalogAction: string
+    continueBrowsingAction: string
     productsHeading: string
-    unitPriceLabel: string
-    quantityLabel: string
+    packLabel: string
+    packetCountLabel: string
+    singlePacketPriceLabel: string
     lineTotalLabel: string
     totalLabel: string
     packPriceNote: string

@@ -45,13 +45,13 @@ For the complete local verification workflow (including the auto-managed Playwri
 - Search and slider filtering are deferred while typing/dragging, product prices are parsed once per catalog load, and the table remains paginated.
 - The dual-ended USD price slider reads catalog metadata and falls back to $0–$1,000 if metadata is missing or invalid.
 
-## Local order estimate
+## Local estimate
 
-- The plus button in each catalog row adds a validly priced product to the separate `/estimate/` page. The catalog still has only its five data columns; the add action is part of the product cell.
-- Catalog rates with fractional cents are rounded to the nearest cent for the estimate; USD calculations use integer cents.
-- Estimate quantities, unit prices, line totals and the grand total are calculated in the browser. Cart snapshots are stored only in this device's local storage; there is no order API, account, checkout, or payment integration.
-- Users can adjust quantities, remove products, clear the estimate or copy a plain-text summary locally. Prices are indicative and must be confirmed with the team; copying does not send the estimate anywhere.
-- The estimate route is included in the offline app-shell cache. The local storage cart is not included in network requests or server-rendered HTML.
+- The plus button in each catalog row adds a validly priced product to the estimate drawer opened from the header. The catalog still has only its five data columns; the add action is part of the product cell.
+- The sidebar shows the number of packets for each listed pack (for example, packets of `1x10`) and the single-packet price. Catalog rates with fractional cents are rounded to the nearest cent.
+- Packet counts, line totals and the grand total are calculated in the browser using integer-cent arithmetic. Cart snapshots are stored only in this device's local storage; there is no order API, account, checkout, or payment integration.
+- Users can adjust packet counts, remove products, clear the estimate or copy a plain-text summary locally. Prices are indicative and must be confirmed with the team; copying does not send the estimate anywhere.
+- The estimate sidebar is part of the offline app shell. The local storage cart is not included in network requests or server-rendered HTML.
 
 ## Build versioned catalog files
 
